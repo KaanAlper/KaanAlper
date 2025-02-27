@@ -1,7 +1,7 @@
 <!-- Profil Başlığı -->
 <h1 align="center">👋 Hi, I'm Kaan! </h1>
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?color=%2336BCF7&size=24&center=true&vCenter=true&lines=EleElectrical+%26+Electronics+Engineer;Game+Developer;Android+App+Developer;Arduino+%26+Tech+Enthusiast;Expert+Console+Applications" />
+  <img src="https://readme-typing-svg.herokuapp.com?color=%2336BCF7&size=24&center=true&vCenter=true&lines=Electrical+%26+Electronics+Engineer;Game+Developer;Android+App+Developer;Arduino+%26+Tech+Enthusiast;Expert+Console+Applications;Bash+Linux+Apps" />
 </p>
 
 ---
