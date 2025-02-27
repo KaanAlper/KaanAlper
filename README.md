@@ -38,7 +38,8 @@
 <p align="center">
   <img src="https://github-readme-stats.vercel.app/api?username=KaanAlper&show_icons=true&theme=radical" />
   <img src="https://github-readme-streak-stats.herokuapp.com/?user=KaanAlper&theme=radical" />
-  <img src="https://github-readme-activity-graph.cyclic.app/graph?username=KaanAlper&theme=github-dark&hide_border=true" />
+  <img src="https://github-readme-activity-graph.vercel.app/graph?username=KaanAlper&theme=github-dark&hide_border=true" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=KaanAlper&theme=github-dark&hide_border=true" />
 </p>
 
 ---
