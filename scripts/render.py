@@ -387,16 +387,43 @@ def banner(cfg, D, p, theme):
     s.append(f'<g filter="url(#drop)">')
     s.append(f'<g class="card" style="animation-delay:-2s">{pixel_card(112, 168, 150, 214, -14, p, 3, border)}</g>')
     s.append(f'<g class="card" style="animation-delay:-4s">{pixel_card(150, 160, 150, 214, -7, p, 5, border)}</g>')
-    # front card with the ASCII portrait
+    # front card: a little collectible card with the ASCII portrait
     A = json.load(open(os.path.join(HERE, "ascii.json")))
-    aw, ah = A["cols"] * A["fs"] * CW, A["rows"] * A["lh"]
-    cw_, ch_ = 168, 236
-    sc = min((cw_ - 24) / aw, (ch_ - 26) / ah)
-    s.append(f'<g class="card"><g transform="translate(222 170) rotate(5)">'
-             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16" fill="{dark["sky2"]}"/>'
-             f'<g transform="translate({-aw * sc / 2:.1f} {-ah * sc / 2 + 4:.1f}) scale({sc:.3f})">{ascii_art(dark, "dark", 0, 0, dark["sky2"])}</g>'
+    fs_, lh_ = A["fs"], A["lh"]
+    lit = [(c, r) for r, row in enumerate(A["grid"]) for c, cell in enumerate(row) if _glyph(cell[0])]
+    c0, c1 = min(c for c, _ in lit), max(c for c, _ in lit) + 1
+    r0, r1 = min(r for _, r in lit), max(r for _, r in lit) + 1
+    bx, by_, bw_, bh_ = c0 * fs_ * CW, r0 * lh_, (c1 - c0) * fs_ * CW, (r1 - r0) * lh_
+    cw_, ch_ = 172, 240
+    area_w, area_h, area_cy = cw_ - 26, ch_ - 62, -ch_ / 2 + 14 + (ch_ - 62) / 2
+    sc = min(area_w / bw_, area_h / bh_)
+    tx, ty = -(bx + bw_ / 2) * sc, area_cy - (by_ + bh_ / 2) * sc
+    rnd2 = random.Random(11)
+    stars = "".join(f'<circle class="tw" cx="{rnd2.uniform(-cw_ / 2, cw_ / 2):.0f}" cy="{rnd2.uniform(-ch_ / 2, 40):.0f}" r="{rnd2.uniform(.5, 1.2):.2f}" '
+                    f'fill="#e9f1ff" style="animation-delay:-{rnd2.uniform(0, 3):.1f}s"/>' for _ in range(22))
+    plate_w = tw("@" + cfg["login"], 12, mono=True) + 26
+    s.append(f'<g class="card"><g transform="translate(224 168) rotate(5)">'
+             f'<clipPath id="fc"><rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16"/></clipPath>'
+             f'<linearGradient id="fcbg" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#0a1426"/><stop offset=".65" stop-color="#0b2236"/><stop offset="1" stop-color="#0b3a3c"/></linearGradient>'
+             f'<radialGradient id="fcglow"><stop offset="0" stop-color="{dark["a"]}" stop-opacity=".35"/><stop offset="1" stop-color="{dark["a"]}" stop-opacity="0"/></radialGradient>'
+             f'<linearGradient id="foil" gradientUnits="userSpaceOnUse" x1="-60" y1="0" x2="60" y2="0" gradientTransform="rotate(25)">'
+             f'<stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="{dark["a"]}" stop-opacity=".18"/>'
+             f'<stop offset=".5" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="{dark["b"]}" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>'
+             f'<animateTransform attributeName="gradientTransform" type="translate" values="-260 0;260 0;260 0" keyTimes="0;.5;1" dur="5s" begin="1.2s" repeatCount="indefinite" additive="sum"/></linearGradient>'
+             f'<mask id="moonc"><rect x="-100" y="-140" width="200" height="280" fill="#fff"/><circle cx="{cw_ / 2 - 26 + 5}" cy="{-ch_ / 2 + 26 - 4}" r="9" fill="#000"/></mask>'
+             f'<g clip-path="url(#fc)">'
+             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" fill="url(#fcbg)"/>{stars}'
+             f'<ellipse cx="0" cy="{area_cy:.0f}" rx="{cw_ * .55:.0f}" ry="{ch_ * .4:.0f}" fill="url(#fcglow)"/>'
+             f'<circle cx="{cw_ / 2 - 26}" cy="{-ch_ / 2 + 26}" r="9" fill="#e9f1ff" mask="url(#moonc)"/>'
+             f'<path d="{wave(5, 60, ch_ / 2 - 30, cw_ + 60, ch_ / 2, 1.0)}" transform="translate({-cw_ / 2 - 30} 0)" fill="{dark["a"]}" opacity=".18"/>'
+             f'<path d="{wave(4, 50, ch_ / 2 - 20, cw_ + 60, ch_ / 2, 2.2)}" transform="translate({-cw_ / 2 - 30} 0)" fill="{dark["b"]}" opacity=".2"/>'
+             f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">{ascii_art(dark, "dark", 0, 0, "#0b2236")}</g>'
+             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" fill="url(#foil)"/>'
+             f'</g>'
+             f'<rect x="{-cw_ / 2 + 7}" y="{-ch_ / 2 + 7}" width="{cw_ - 14}" height="{ch_ - 14}" rx="11" fill="none" stroke="url(#hl)" stroke-width="1.2" opacity=".7"/>'
+             f'<rect x="{-plate_w / 2:.1f}" y="{ch_ / 2 - 36}" width="{plate_w:.1f}" height="22" rx="11" fill="#05070c" fill-opacity=".7" stroke="url(#hlh)" stroke-width="1"/>'
+             f'<text {MONO} x="0" y="{ch_ / 2 - 21}" font-size="12" font-weight="700" fill="#e9f1ff" text-anchor="middle">@{X(cfg["login"])}</text>'
              f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16" fill="none" stroke="{border}" stroke-width="5"/>'
-             f'<text {MONO} x="{cw_ / 2 - 6}" y="{-ch_ / 2 - 9}" font-size="13" font-weight="700" fill="{p["text"]}" text-anchor="end">@{X(cfg["login"])}</text>'
              f'</g></g></g>')
     # big chunky name with an offset shadow
     x0 = 330
