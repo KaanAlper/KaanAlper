@@ -1,148 +1,41 @@
 {
   "login": "KaanAlper",
-  "name": "KAAN ALPER",
+  "name": "Kaan Alper",
   "greeting": "merhaba, I'm",
-  "tagline": [
-    "I build the tools my own machine is missing:",
-    "Linux desktops, DPI bypass, native Rust apps."
+  "roles": [
+    "Engineering student from Turkey.",
+    "I brought Hyprland to Windows.",
+    "I make apps for Linux, Windows and Android."
   ],
   "chips": [
     { "icon": "location_on", "label": "Turkey" },
+    { "icon": "brand:hyprland", "label": "CachyOS + Hyprland" }
+  ],
+  "about": [
     { "icon": "school", "label": "Engineering student" },
-    { "icon": "brand:archlinux", "label": "CachyOS + Hyprland" }
+    { "icon": "brand:hyprland", "label": "Daily drives Hyprland" },
+    { "icon": "brand:android", "label": "Desktop and Android apps" },
+    { "icon": "memory", "label": "Into reverse engineering" }
   ],
-  "typing": [
-    "merhaba, I'm Kaan.",
-    "I brought Hyprland to Windows.",
-    "I beat DPI with a tray icon.",
-    "I write native Rust apps. No Electron.",
-    "I take games apart to see how they tick.",
-    "Welcome to my GitHub."
+  "stack": [
+    { "title": "main", "items": [["rust", "Rust"], ["python", "Python"], ["kotlin", "Kotlin"], ["cplusplus", "C++"], ["dotnet", "C#"]] },
+    { "title": "tools", "items": [["archlinux", "Arch"], ["hyprland", "Hyprland"], ["tauri", "Tauri"], ["docker", "Docker"], ["git", "Git"], ["claude", "Claude Code"]] }
   ],
-  "fetch": {
-    "user": "kaan",
-    "host": "github",
-    "rows": [
-      ["OS", "CachyOS (Arch) x86_64"],
-      ["WM", "Hyprland + Quickshell"],
-      ["Shell", "fish"],
-      ["Role", "Engineering student"],
-      ["Location", "Turkey"],
-      ["Builds", "desktop shells, censorship bypass, RE tools"],
-      ["Langs", "Rust, Python, Kotlin, C++, C#"],
-      ["Repos", "{repos} public, {stars} stars earned"],
-      ["GitHub", "since {since}, {followers} followers"],
-      ["Motto", "If it doesn't exist, write it."]
-    ]
-  },
-  "socials": [
-    { "icon": "instagram", "label": "instagram", "url": "https://www.instagram.com/kaan__alper/" },
-    { "icon": "x", "label": "x.com", "url": "https://x.com/Kaan__Alper" },
-    { "icon": "anilist", "label": "anilist", "url": "https://anilist.co/user/KaanAlper/" },
-    { "icon": "steam", "label": "steam", "url": "https://steamcommunity.com/id/kaanalper" },
-    { "icon": "gmail", "label": "mail", "url": "mailto:kaanalperkaraaslan@gmail.com" }
+  "projects": [
+    { "repo": "logical-lunge", "icon": "desktop_windows", "text": "Hyprland-style desktop environment for Windows 10 and 11." },
+    { "repo": "Aegis-Authleniticator-Linux", "title": "aegis-linux", "icon": "key", "text": "Linux desktop client for Aegis 2FA vaults, written in Rust." },
+    { "repo": "ByteForge", "icon": "memory", "text": "Reverse engineering and modding toolkit for apps and games." },
+    { "repo": "AsenaPlug", "icon": "vpn_lock", "text": "DPI and DNS censorship bypass. Tray app plus Android." }
   ],
+  "dock": ["hyprland", "archlinux", "rust", "python", "kotlin", "android", "tauri", "docker", "git", "claude"],
   "buttons": [
     { "icon": "language", "label": "kaanalper.github.io", "url": "https://kaanalper.github.io" },
     { "icon": "book_2", "label": "all repositories", "url": "https://github.com/KaanAlper?tab=repositories" }
   ],
-  "stack": [
-    {
-      "title": "langs",
-      "items": [
-        ["rust", "Rust"], ["python", "Python"], ["kotlin", "Kotlin"], ["cplusplus", "C++"],
-        ["dotnet", "C#"], ["go", "Go"], ["openjdk", "Java"], ["gnubash", "Bash"]
-      ]
-    },
-    {
-      "title": "ui",
-      "items": [
-        ["tauri", "Tauri"], ["qt", "PySide6 / QML"], ["android", "Compose"], ["godotengine", "Godot"],
-        ["rust", "egui / wgpu"]
-      ]
-    },
-    {
-      "title": "sys",
-      "items": [
-        ["archlinux", "Arch"], ["hyprland", "Hyprland"], ["docker", "Docker"],
-        ["githubactions", "Actions"], ["arduino", "Arduino"], ["git", "Git"], ["claude", "Claude Code"]
-      ]
-    }
-  ],
-  "featured": [
-    {
-      "repo": "logical-lunge",
-      "text": "The Hyprland experience on Windows 10/11: its own tiling window manager, bar, panels and live wallpapers.",
-      "tags": ["windows", "tiling-wm", "beta"]
-    },
-    {
-      "repo": "Aegis-Authleniticator-Linux",
-      "title": "aegis-linux",
-      "text": "Your Aegis 2FA vault, native on the Linux desktop. Pure Rust, Wayland and X11, no Electron, no cloud.",
-      "tags": ["2fa", "egui", "appimage"]
-    },
-    {
-      "repo": "ByteForge",
-      "text": "Reverse-engineering and modding studio: APK / IL2CPP patching, disassembly, Yara, live memory editing.",
-      "tags": ["reverse-eng", "tauri", "modding"]
-    },
-    {
-      "repo": "AsenaPlug",
-      "text": "HTTPS-disguised MASQUE tunnel that survives Turkish DPI. Tray app for Windows and Linux plus a native Android app.",
-      "tags": ["dpi-bypass", "masque", "android"]
-    }
-  ],
-  "workspaces": [
-    {
-      "name": "desktop",
-      "icon": "desktop_windows",
-      "repos": [
-        { "repo": "illogical-impulse-kaan-custom", "title": "kaan-dots", "text": "My Hyprland + Quickshell setup with dotsync, a GUI installer that fills in what's missing." },
-        { "repo": "hypr-droid", "text": "Waydroid on Hyprland: tray indicator with smart restart and the libhoudini step nobody documents." },
-        { "repo": "sudo-for-windows", "text": "A Linux-like sudo for Windows with real password verification and seamless elevation." },
-        { "repo": "bt-tray-win", "text": "One-click A2DP / HFP switcher so Discord and OBS stop ruining your headset audio." }
-      ]
-    },
-    {
-      "name": "network",
-      "icon": "vpn_lock",
-      "repos": [
-        { "repo": "AsenaDPI", "text": "Beat DPI and DNS poisoning with one tray toggle. zapret nfqws + DoT. No VPN, no tunnel." },
-        { "repo": "AsenaScale", "text": "Use Claude Code on your PC from your phone: native terminal over an embedded Tailscale." },
-        { "repo": "ConnectSync", "text": "Zero-knowledge, end-to-end encrypted P2P sync bridged over Google Drive. Rust + Slint." },
-        { "repo": "Asenaizer", "text": "Rewrite drafts in the browser with a model running on your own GPU. Rust tray + Go service." }
-      ]
-    },
-    {
-      "name": "create",
-      "icon": "palette",
-      "repos": [
-        { "repo": "Dimenced", "lang": "Rust", "lang_color": "#dea584", "text": "Hardware-accelerated 3D spatial sketching studio: draw strokes on movable 3D planes. Rust + wgpu." },
-        { "repo": "Protasena", "lang": "Rust", "lang_color": "#dea584", "text": "Clean-room electronics design suite in Rust: schematic, simulation and PCB, Proteus-style." },
-        { "repo": "Protasena-library", "lang": "KiCad libs", "lang_color": "#314cb0", "text": "KiCad's official symbol and footprint libraries, converted into Protasena's pack format." },
-        { "repo": "PDF-Reader", "text": "A zero-install PDF reader that runs straight from GitHub Pages, built on pdf.js." }
-      ]
-    },
-    {
-      "name": "play",
-      "icon": "sports_esports",
-      "repos": [
-        { "repo": "UnderRune", "text": "DELTARUNE boss battles in the browser. Fan project and graduation project, with a playable demo." },
-        { "repo": "anime-cli", "text": "Search, stream and download anime with Turkish subtitles from the terminal. Rust + gum + mpv." },
-        { "repo": "anikku-extension-repo", "title": "anikku-ext-tr", "text": "Turkish Anikku / Aniyomi extensions built on the methods that keep anime-cli working." },
-        { "repo": "Minecraft-Server-Opener", "title": "mc-server-opener", "text": "Spin up Vanilla, Paper, Forge, Fabric or Sponge servers from one fzf menu." }
-      ]
-    },
-    {
-      "name": "hardware",
-      "icon": "precision_manufacturing",
-      "repos": [
-        { "repo": "teknofest-2026-sruy", "title": "cargobot", "text": "TEKNOFEST 2026: autonomous forklift robot talking to a factory PLC. ROS2, asyncio, PySide6/QML." },
-        { "repo": "LCD-PC-Temperture-shower-with-Arduino", "title": "arduino-pc-monitor", "text": "CPU and GPU temperatures on a 16x2 I2C LCD driven by an Arduino UNO." },
-        { "repo": "Facial-Recognition-Attendance-System", "title": "face-attendance", "text": "Real-time face recognition attendance system with MySQL integration." },
-        { "repo": "WaydroidOnX11", "text": "Run Waydroid on X11 sessions through a nested Weston compositor." }
-      ]
-    }
-  ],
-  "dock": ["hyprland", "archlinux", "rust", "python", "kotlin", "cplusplus", "android", "tauri", "godotengine", "arduino", "docker", "git", "github", "claude"]
+  "socials": [
+    { "icon": "instagram", "url": "https://www.instagram.com/kaan__alper/" },
+    { "icon": "x", "url": "https://x.com/Kaan__Alper" },
+    { "icon": "anilist", "url": "https://anilist.co/user/KaanAlper/" },
+    { "icon": "steam", "url": "https://steamcommunity.com/id/kaanalper" }
+  ]
 }
