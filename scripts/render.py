@@ -798,6 +798,12 @@ def main():
         raw = gql(QUERY, {"login": cfg["login"]}, token)
     D = digest(raw)
     files, readme = build(cfg, D)
+    # cache-busting: each image link carries a hash of its content, so a changed
+    # card gets a new URL and GitHub / browsers never show a stale copy
+    import hashlib
+    for name, body in files.items():
+        v = hashlib.sha1(body.encode()).hexdigest()[:8]
+        readme = readme.replace(f'"assets/{name}"', f'"assets/{name}?v={v}"')
     os.makedirs(ASSETS, exist_ok=True)
     for old in os.listdir(ASSETS):
         if old.endswith(".svg") and old not in files:
