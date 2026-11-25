@@ -323,7 +323,7 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
 
 
 CARD = {  # card stock + ink per page theme, taken from the panel's own tones
-    "dark": dict(f1="#123552", f2="#0f4644", ink="#8fe3ff", ink2="#6ff5c6", dot="#8fe3ff"),
+    "dark": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86"),  # white stock reads best on both
     "light": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86"),
 }
 
@@ -388,7 +388,7 @@ def joker_card(cx, cy, rot, cfg, border, C, theme):
     acy = fy + 10 + ah_ / 2
     tx, ty = -(bx + bw / 2) * sc, acy - (by + bh / 2) * sc
     s.append(f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">'
-             f'{ascii_art(PAL[theme], theme, 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
+             f'{ascii_art(PAL["light"], "light", 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
     # caption in the frame
     cap = "@" + cfg["login"]
     s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{C["ink"]}" stroke-width=".6" opacity=".6"/>'
