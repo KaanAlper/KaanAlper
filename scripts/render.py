@@ -323,15 +323,15 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
 
 
 CARD = {  # card stock + ink per page theme, taken from the panel's own tones
-    "dark": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86"),  # white stock reads best on both
-    "light": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86"),
+    "dark": dict(f1="#0e1a29", f2="#0e1a29", ink="#9be7ff", ink2="#7af7cc", dot="#9be7ff", grain=.05),  # flat and crisp
+    "light": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86", grain=.16),
 }
 
 
 def card_stock(cid, x0, y0, w, h, C, rx=14):
     """Card face: soft gradient in the panel's tones with a fine dot grain on top."""
     return (f'<linearGradient id="{cid}g" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="{C["f1"]}"/><stop offset="1" stop-color="{C["f2"]}"/></linearGradient>'
-            f'<pattern id="{cid}d" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".6" fill="{C["dot"]}" opacity=".16"/></pattern>'
+            f'<pattern id="{cid}d" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".6" fill="{C["dot"]}" opacity="{C["grain"]}"/></pattern>'
             f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{rx}" fill="url(#{cid}g)"/>'
             f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{rx}" fill="url(#{cid}d)"/>')
 
@@ -370,7 +370,7 @@ def joker_card(cx, cy, rot, cfg, border, C, theme):
     fx, fy, fw, fh = x0 + 26, y0 + 16, w - 52, h - 32  # inner frame
     s = [f'<g transform="translate({cx} {cy}) rotate({rot})">',
          card_stock("jf", x0, y0, w, h, C),
-         f'<radialGradient id="jglow"><stop offset="0" stop-color="{C["ink"]}" stop-opacity=".16"/><stop offset="1" stop-color="{C["ink"]}" stop-opacity="0"/></radialGradient>'
+         f'<radialGradient id="jglow"><stop offset="0" stop-color="{C["ink"]}" stop-opacity="{.16 if theme == "light" else 0}"/><stop offset="1" stop-color="{C["ink"]}" stop-opacity="0"/></radialGradient>'
          f'<ellipse cx="0" cy="{fy + fh * .42:.0f}" rx="{fw * .6:.0f}" ry="{fh * .45:.0f}" fill="url(#jglow)"/>',
          f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="4" fill="none" stroke="{C["ink"]}" stroke-width="1.2"/>',
          f'<rect x="{fx + 4}" y="{fy + 4}" width="{fw - 8}" height="{fh - 8}" rx="2" fill="none" stroke="{C["ink2"]}" stroke-width=".6" opacity=".6"/>']
@@ -388,7 +388,7 @@ def joker_card(cx, cy, rot, cfg, border, C, theme):
     acy = fy + 10 + ah_ / 2
     tx, ty = -(bx + bw / 2) * sc, acy - (by + bh / 2) * sc
     s.append(f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">'
-             f'{ascii_art(PAL["light"], "light", 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
+             f'{ascii_art(PAL[theme], theme, 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
     # caption in the frame
     cap = "@" + cfg["login"]
     s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{C["ink"]}" stroke-width=".6" opacity=".6"/>'
