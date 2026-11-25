@@ -267,7 +267,7 @@ RAMP = " .:-=+*#%@"
 
 
 def _glyph(w):
-    w = w ** .6 if w > 0 else 0
+    w = w ** .5 if w > 0 else 0
     return 0 if w < .12 else min(len(RAMP) - 1, 1 + int((w - .12) / .88 * (len(RAMP) - 1)))
 
 
@@ -323,8 +323,8 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
 
 
 CARD = {  # card stock + ink per page theme, taken from the panel's own tones
-    "dark": dict(f1="#0e1a29", f2="#0e1a29", ink="#9be7ff", ink2="#7af7cc", dot="#9be7ff", grain=.05),  # flat and crisp
-    "light": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86", grain=.16),
+    "dark": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86", grain=.16, kind="light"),  # white stock on a dark page
+    "light": dict(f1="#0e1a29", f2="#0e1a29", ink="#9be7ff", ink2="#7af7cc", dot="#9be7ff", grain=.05, kind="dark"),  # dark stock on a light page
 }
 
 
@@ -365,12 +365,12 @@ def card_back(cx, cy, w, h, rot, seed, border, C):
 
 def joker_card(cx, cy, rot, cfg, border, C, theme):
     """Front card: a Joker in the deck's ink, with corner indices and a framed portrait."""
-    w, h = 172, 240
+    w, h = 196, 270
     x0, y0 = -w / 2, -h / 2
     fx, fy, fw, fh = x0 + 26, y0 + 16, w - 52, h - 32  # inner frame
     s = [f'<g transform="translate({cx} {cy}) rotate({rot})">',
          card_stock("jf", x0, y0, w, h, C),
-         f'<radialGradient id="jglow"><stop offset="0" stop-color="{C["ink"]}" stop-opacity="{.16 if theme == "light" else 0}"/><stop offset="1" stop-color="{C["ink"]}" stop-opacity="0"/></radialGradient>'
+         f'<radialGradient id="jglow"><stop offset="0" stop-color="{C["ink"]}" stop-opacity="{.16 if C["kind"] == "light" else 0}"/><stop offset="1" stop-color="{C["ink"]}" stop-opacity="0"/></radialGradient>'
          f'<ellipse cx="0" cy="{fy + fh * .42:.0f}" rx="{fw * .6:.0f}" ry="{fh * .45:.0f}" fill="url(#jglow)"/>',
          f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="4" fill="none" stroke="{C["ink"]}" stroke-width="1.2"/>',
          f'<rect x="{fx + 4}" y="{fy + 4}" width="{fw - 8}" height="{fh - 8}" rx="2" fill="none" stroke="{C["ink2"]}" stroke-width=".6" opacity=".6"/>']
@@ -388,7 +388,7 @@ def joker_card(cx, cy, rot, cfg, border, C, theme):
     acy = fy + 10 + ah_ / 2
     tx, ty = -(bx + bw / 2) * sc, acy - (by + bh / 2) * sc
     s.append(f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">'
-             f'{ascii_art(PAL[theme], theme, 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
+             f'{ascii_art(PAL[C["kind"]], C["kind"], 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
     # caption in the frame
     cap = "@" + cfg["login"]
     s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{C["ink"]}" stroke-width=".6" opacity=".6"/>'
@@ -406,7 +406,7 @@ def banner(cfg, D, p, theme):
     """Hero in the spirit of a trading-card banner: tilted sticker cards spill out of a
     striped panel, a big chunky name, and a row of little tiles hanging off the bottom."""
     H = 330
-    px, py, pw, ph = 96, 22, W - 96, 250  # panel
+    px, py, pw, ph = 112, 30, W - 112, 250  # panel
     P = 300
     page = theme
     # the panel is bright pastel in both themes so it pops off the page; the portrait card stays dark
@@ -456,27 +456,27 @@ def banner(cfg, D, p, theme):
     # a little hand of playing cards spilling out of the panel's left edge
     s.append(f'<g filter="url(#drop)" class="in">')
     C = CARD[page]
-    s.append(card_back(110, 168, 150, 212, -15, 3, border, C))
-    s.append(card_back(150, 160, 150, 212, -7, 5, border, C))
-    s.append(joker_card(224, 166, 5, cfg, border, C, page))
+    s.append(card_back(126, 172, 176, 246, -15, 3, border, C))
+    s.append(card_back(172, 164, 176, 246, -7, 5, border, C))
+    s.append(joker_card(256, 166, 5, cfg, border, C, page))
     s.append("</g>")
     # big chunky name with an offset shadow
-    x0 = 330
+    x0 = 376
     name = X(cfg["name"])
     s.append(f'<g class="in" style="animation-delay:.15s">'
-             f'<text {MONO} x="{x0 + 4}" y="{py + 92}" font-size="72" font-weight="800" fill="{p["a"]}" opacity=".55" letter-spacing="-2">{name}</text>'
-             f'<text {MONO} x="{x0}" y="{py + 88}" font-size="72" font-weight="800" fill="{p["text"]}" letter-spacing="-2">{name}</text></g>')
-    s.append(f'<g class="in" style="animation-delay:.3s"><text {MONO} x="{x0 + 2}" y="{py + 124}" font-size="19" font-weight="700" fill="{p["text"]}">{X(cfg["headline"])}</text>'
-             f'<text {MONO} x="{x0 + 2}" y="{py + 148}" font-size="14" fill="{p["muted"]}">{X(cfg["subline"])}</text></g>')
-    s.append(f'<g class="in" style="animation-delay:.45s"><text {MONO} x="{x0 + 2}" y="{py + 192}" font-size="20" font-weight="800" fill="{p["text"]}">Daily drivers</text></g>')
+             f'<text {MONO} x="{x0 + 4}" y="{py + 86}" font-size="74" font-weight="800" fill="{p["a"]}" opacity=".55" letter-spacing="-2">{name}</text>'
+             f'<text {MONO} x="{x0}" y="{py + 82}" font-size="74" font-weight="800" fill="{p["text"]}" letter-spacing="-2">{name}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.3s"><text {MONO} x="{x0 + 2}" y="{py + 118}" font-size="21" font-weight="700" fill="{p["text"]}">{X(cfg["headline"])}</text>'
+             f'<text {MONO} x="{x0 + 2}" y="{py + 144}" font-size="17" font-weight="700" fill="{p["muted"]}">{X(cfg["subline"])}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.45s"><text {MONO} x="{x0 + 2}" y="{py + 186}" font-size="22" font-weight="800" fill="{p["text"]}">Daily drivers</text></g>')
     # tiles hanging off the bottom edge of the panel
     for i, slug in enumerate(cfg["drivers"]):
-        tx, ty, ts = x0 + 2 + i * 62, py + 206, 54
+        tx, ty, ts = x0 + 2 + i * 70, py + 200, 62
         s.append(f'<g class="pop" style="animation-delay:{.6 + i * .08:.2f}s"><g>'
                  f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="12" fill="{p["c1"]}" stroke="{border}" stroke-width="3.5" filter="url(#drop)"/>'
-                 + icon("brand:" + slug, tx + 14, ty + 14, 26, None, theme, p)
+                 + icon("brand:" + slug, tx + 15, ty + 15, 32, None, theme, p)
                  + f'<title>{X(ICONS["brand"][slug]["t"])}</title></g></g>')
-    return doc(W, H, "".join(s), p, (("KM", 400), ("KM", 700), ("KM", 800)), defs, css,
+    return doc(W, H + 12, '<g transform="translate(0 10)">' + "".join(s) + "</g>", p, (("KM", 400), ("KM", 700), ("KM", 800)), defs, css,
                f"{cfg['name']}: {cfg['headline']}. {cfg['subline']}")
 
 

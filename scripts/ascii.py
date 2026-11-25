@@ -16,9 +16,9 @@ import urllib.request
 from PIL import Image, ImageFilter, ImageOps
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FS, LH = 6.4, 6.6  # font size / line height used by render.py
+FS, LH = 8.6, 9.0  # font size / line height used by render.py
 CW = FS * 0.6
-ROWS = 41
+ROWS = 30
 
 
 def main():
