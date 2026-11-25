@@ -290,7 +290,7 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
             k = _glyph(w)
             ww = w ** .6 if w > 0 else 0
             if ink:
-                c = mix(base, bg, .3 * (1 - ww))
+                c = mix(base, bg, (.12 if lum(bg) > .5 else .3) * (1 - ww))
             else:
                 c = mix(base, f"#{R:02x}{G:02x}{B:02x}", .2)
                 if theme == "dark":
@@ -323,7 +323,7 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
 
 
 CARD = {  # card stock + ink per page theme, taken from the panel's own tones
-    "dark": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86", grain=.16, kind="light"),  # white stock on a dark page
+    "dark": dict(f1="#f6fcff", f2="#ecfbf4", ink="#06405f", ink2="#05603f", dot="#0b5c86", grain=.16, kind="light"),  # white stock on a dark page
     "light": dict(f1="#0e1a29", f2="#0e1a29", ink="#9be7ff", ink2="#7af7cc", dot="#9be7ff", grain=.05, kind="dark"),  # dark stock on a light page
 }
 
@@ -406,7 +406,7 @@ def banner(cfg, D, p, theme):
     """Hero in the spirit of a trading-card banner: tilted sticker cards spill out of a
     striped panel, a big chunky name, and a row of little tiles hanging off the bottom."""
     H = 330
-    px, py, pw, ph = 112, 30, W - 112, 250  # panel
+    px, py, pw, ph = 76, 20, W - 76, 272  # panel: ~90% wide, cards spill out of its left and bottom edges
     P = 300
     page = theme
     # the panel is bright pastel in both themes so it pops off the page; the portrait card stays dark
@@ -464,14 +464,14 @@ def banner(cfg, D, p, theme):
     x0 = 376
     name = X(cfg["name"])
     s.append(f'<g class="in" style="animation-delay:.15s">'
-             f'<text {MONO} x="{x0 + 4}" y="{py + 86}" font-size="74" font-weight="800" fill="{p["a"]}" opacity=".55" letter-spacing="-2">{name}</text>'
-             f'<text {MONO} x="{x0}" y="{py + 82}" font-size="74" font-weight="800" fill="{p["text"]}" letter-spacing="-2">{name}</text></g>')
-    s.append(f'<g class="in" style="animation-delay:.3s"><text {MONO} x="{x0 + 2}" y="{py + 118}" font-size="21" font-weight="700" fill="{p["text"]}">{X(cfg["headline"])}</text>'
-             f'<text {MONO} x="{x0 + 2}" y="{py + 144}" font-size="17" font-weight="700" fill="{p["muted"]}">{X(cfg["subline"])}</text></g>')
-    s.append(f'<g class="in" style="animation-delay:.45s"><text {MONO} x="{x0 + 2}" y="{py + 186}" font-size="22" font-weight="800" fill="{p["text"]}">Daily drivers</text></g>')
+             f'<text {MONO} x="{x0 + 4}" y="{py + 96}" font-size="74" font-weight="800" fill="{p["a"]}" opacity=".55" letter-spacing="-2">{name}</text>'
+             f'<text {MONO} x="{x0}" y="{py + 92}" font-size="74" font-weight="800" fill="{p["text"]}" letter-spacing="-2">{name}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.3s"><text {MONO} x="{x0 + 2}" y="{py + 130}" font-size="21" font-weight="700" fill="{p["text"]}">{X(cfg["headline"])}</text>'
+             f'<text {MONO} x="{x0 + 2}" y="{py + 157}" font-size="17" font-weight="700" fill="{p["muted"]}">{X(cfg["subline"])}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.45s"><text {MONO} x="{x0 + 2}" y="{py + 205}" font-size="22" font-weight="800" fill="{p["text"]}">Daily drivers</text></g>')
     # tiles hanging off the bottom edge of the panel
     for i, slug in enumerate(cfg["drivers"]):
-        tx, ty, ts = x0 + 2 + i * 70, py + 200, 62
+        tx, ty, ts = x0 + 2 + i * 70, py + 224, 62
         s.append(f'<g class="pop" style="animation-delay:{.6 + i * .08:.2f}s"><g>'
                  f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="12" fill="{p["c1"]}" stroke="{border}" stroke-width="3.5" filter="url(#drop)"/>'
                  + icon("brand:" + slug, tx + 15, ty + 15, 32, None, theme, p)
