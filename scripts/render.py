@@ -290,7 +290,7 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
             k = _glyph(w)
             ww = w ** .6 if w > 0 else 0
             if ink:
-                c = mix(base, bg, .5 * (1 - ww))
+                c = mix(base, bg, .3 * (1 - ww))
             else:
                 c = mix(base, f"#{R:02x}{G:02x}{B:02x}", .2)
                 if theme == "dark":
@@ -322,7 +322,18 @@ def ascii_art(p, theme, x, y, bg, ink=None, static=False):
         f'<g clip-path="url(#asc)"><rect class="scan" x="{x}" y="{y - 30}" width="{aw:.0f}" height="26" fill="url(#scanG)"/></g></g>'])
 
 
-CARD_FACE, CARD_INK, CARD_INK2 = "#0c1a2b", "#7fdcff", "#5ff2c0"
+CARD = {  # card stock + ink per page theme, taken from the panel's own tones
+    "dark": dict(f1="#123552", f2="#0f4644", ink="#8fe3ff", ink2="#6ff5c6", dot="#8fe3ff"),
+    "light": dict(f1="#f6fcff", f2="#ecfbf4", ink="#0b5c86", ink2="#08855a", dot="#0b5c86"),
+}
+
+
+def card_stock(cid, x0, y0, w, h, C, rx=14):
+    """Card face: soft gradient in the panel's tones with a fine dot grain on top."""
+    return (f'<linearGradient id="{cid}g" x1="0" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="{C["f1"]}"/><stop offset="1" stop-color="{C["f2"]}"/></linearGradient>'
+            f'<pattern id="{cid}d" width="7" height="7" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".6" fill="{C["dot"]}" opacity=".16"/></pattern>'
+            f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{rx}" fill="url(#{cid}g)"/>'
+            f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="{rx}" fill="url(#{cid}d)"/>')
 
 
 def crescent(cx, cy, r, color, mid):
@@ -332,7 +343,7 @@ def crescent(cx, cy, r, color, mid):
             f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}" mask="url(#{mid})"/>')
 
 
-def card_back(cx, cy, w, h, rot, seed, border):
+def card_back(cx, cy, w, h, rot, seed, border, C):
     """Playing-card back: navy stock, fine diamond lattice, crescent medallion."""
     x0, y0, ins = -w / 2, -h / 2, 10
     lines, step = [], 13
@@ -341,28 +352,30 @@ def card_back(cx, cy, w, h, rot, seed, border):
         lines.append(f'<line x1="{x0 + k}" y1="{y0 + h}" x2="{x0 + k + h}" y2="{y0}"/>')
     cid = f"cb{seed}"
     return (f'<g transform="translate({cx} {cy}) rotate({rot})">'
-            f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="{CARD_FACE}"/>'
-            f'<clipPath id="{cid}"><rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7"/></clipPath>'
-            f'<g clip-path="url(#{cid})" stroke="{CARD_INK}" stroke-width=".8" opacity=".28">{"".join(lines)}</g>'
-            f'<rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7" fill="none" stroke="{CARD_INK}" stroke-width="1.2" opacity=".75"/>'
-            f'<rect x="{x0 + ins + 4}" y="{y0 + ins + 4}" width="{w - 2 * ins - 8}" height="{h - 2 * ins - 8}" rx="5" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".5"/>'
-            f'<circle cx="0" cy="0" r="22" fill="{CARD_FACE}" stroke="{CARD_INK}" stroke-width="1.2"/>'
-            f'<circle cx="0" cy="0" r="17" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".7"/>'
-            + crescent(0, 0, 9, CARD_INK, f"cm{seed}")
+            + card_stock(f"cs{seed}", x0, y0, w, h, C)
+            + f'<clipPath id="{cid}"><rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7"/></clipPath>'
+            f'<g clip-path="url(#{cid})" stroke="{C["ink"]}" stroke-width=".8" opacity=".25">{"".join(lines)}</g>'
+            f'<rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7" fill="none" stroke="{C["ink"]}" stroke-width="1.2" opacity=".75"/>'
+            f'<rect x="{x0 + ins + 4}" y="{y0 + ins + 4}" width="{w - 2 * ins - 8}" height="{h - 2 * ins - 8}" rx="5" fill="none" stroke="{C["ink2"]}" stroke-width=".6" opacity=".5"/>'
+            f'<circle cx="0" cy="0" r="22" fill="{C["f1"]}" stroke="{C["ink"]}" stroke-width="1.2"/>'
+            f'<circle cx="0" cy="0" r="17" fill="none" stroke="{C["ink2"]}" stroke-width=".6" opacity=".7"/>'
+            + crescent(0, 0, 9, C["ink"], f"cm{seed}")
             + f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="none" stroke="{border}" stroke-width="5"/></g>')
 
 
-def joker_card(cx, cy, rot, cfg, border):
+def joker_card(cx, cy, rot, cfg, border, C, theme):
     """Front card: a Joker in the deck's ink, with corner indices and a framed portrait."""
     w, h = 172, 240
     x0, y0 = -w / 2, -h / 2
     fx, fy, fw, fh = x0 + 26, y0 + 16, w - 52, h - 32  # inner frame
     s = [f'<g transform="translate({cx} {cy}) rotate({rot})">',
-         f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="{CARD_FACE}"/>',
-         f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="4" fill="none" stroke="{CARD_INK}" stroke-width="1.2"/>',
-         f'<rect x="{fx + 4}" y="{fy + 4}" width="{fw - 8}" height="{fh - 8}" rx="2" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".6"/>']
+         card_stock("jf", x0, y0, w, h, C),
+         f'<radialGradient id="jglow"><stop offset="0" stop-color="{C["ink"]}" stop-opacity=".16"/><stop offset="1" stop-color="{C["ink"]}" stop-opacity="0"/></radialGradient>'
+         f'<ellipse cx="0" cy="{fy + fh * .42:.0f}" rx="{fw * .6:.0f}" ry="{fh * .45:.0f}" fill="url(#jglow)"/>',
+         f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="4" fill="none" stroke="{C["ink"]}" stroke-width="1.2"/>',
+         f'<rect x="{fx + 4}" y="{fy + 4}" width="{fw - 8}" height="{fh - 8}" rx="2" fill="none" stroke="{C["ink2"]}" stroke-width=".6" opacity=".6"/>']
     for dx, dy in ((fx, fy), (fx + fw, fy), (fx, fy + fh), (fx + fw, fy + fh)):
-        s.append(f'<rect x="{dx - 3.5}" y="{dy - 3.5}" width="7" height="7" fill="{CARD_FACE}" stroke="{CARD_INK}" stroke-width="1" transform="rotate(45 {dx} {dy})"/>')
+        s.append(f'<rect x="{dx - 3.5}" y="{dy - 3.5}" width="7" height="7" fill="{C["f1"]}" stroke="{C["ink"]}" stroke-width="1" transform="rotate(45 {dx} {dy})"/>')
     # portrait, fitted to the frame
     A = json.load(open(os.path.join(HERE, "ascii.json")))
     fs_, lh_ = A["fs"], A["lh"]
@@ -375,16 +388,16 @@ def joker_card(cx, cy, rot, cfg, border):
     acy = fy + 10 + ah_ / 2
     tx, ty = -(bx + bw / 2) * sc, acy - (by + bh / 2) * sc
     s.append(f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">'
-             f'{ascii_art(PAL["dark"], "dark", 0, 0, CARD_FACE, ink=(CARD_INK, CARD_INK2), static=True)}</g>')
+             f'{ascii_art(PAL[theme], theme, 0, 0, mix(C["f1"], C["f2"], .5), ink=(C["ink"], C["ink2"]), static=True)}</g>')
     # caption in the frame
     cap = "@" + cfg["login"]
-    s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{CARD_INK}" stroke-width=".6" opacity=".6"/>'
-             f'<text {MONO} x="0" y="{fy + fh - 9}" font-size="9.5" font-weight="700" fill="{CARD_INK}" text-anchor="middle" letter-spacing=".5">{X(cap)}</text>')
+    s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{C["ink"]}" stroke-width=".6" opacity=".6"/>'
+             f'<text {MONO} x="0" y="{fy + fh - 9}" font-size="9.5" font-weight="700" fill="{C["ink"]}" text-anchor="middle" letter-spacing=".5">{X(cap)}</text>')
     # corner indices: JOKER stacked + crescent suit, mirrored at the bottom right
-    idx = "".join(f'<text {MONO} x="{x0 + 13}" y="{y0 + 24 + i * 11.5}" font-size="11" font-weight="800" fill="{CARD_INK}" text-anchor="middle">{ch}</text>'
+    idx = "".join(f'<text {MONO} x="{x0 + 13}" y="{y0 + 24 + i * 11.5}" font-size="11" font-weight="800" fill="{C["ink"]}" text-anchor="middle">{ch}</text>'
                   for i, ch in enumerate("JOKER"))
-    s.append(idx + crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, CARD_INK2, "jk1"))
-    s.append(f'<g transform="rotate(180)">{idx}{crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, CARD_INK2, "jk2")}</g>')
+    s.append(idx + crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, C["ink2"], "jk1"))
+    s.append(f'<g transform="rotate(180)">{idx}{crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, C["ink2"], "jk2")}</g>')
     s.append(f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="none" stroke="{border}" stroke-width="5"/></g>')
     return "".join(s)
 
@@ -442,9 +455,10 @@ def banner(cfg, D, p, theme):
     s.append("</g>")
     # a little hand of playing cards spilling out of the panel's left edge
     s.append(f'<g filter="url(#drop)" class="in">')
-    s.append(card_back(110, 168, 150, 212, -15, 3, border))
-    s.append(card_back(150, 160, 150, 212, -7, 5, border))
-    s.append(joker_card(224, 166, 5, cfg, border))
+    C = CARD[page]
+    s.append(card_back(110, 168, 150, 212, -15, 3, border, C))
+    s.append(card_back(150, 160, 150, 212, -7, 5, border, C))
+    s.append(joker_card(224, 166, 5, cfg, border, C, page))
     s.append("</g>")
     # big chunky name with an offset shadow
     x0 = 330
