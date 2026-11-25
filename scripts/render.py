@@ -286,36 +286,60 @@ def shell(w, h, p, title=None, ic=None, theme=None, tint=None):
     return "".join(s)
 
 
-def ascii_art(p, theme, x, y):
-    """fastfetch-style ASCII logo (scripts/art.txt) painted into the sky.
+RAMP = " .:-=+*#%@"
 
-    Lines fade in one by one, the bottom dissolves into the waves, and a light
-    band sweeps through the glyphs only (the text itself is the clip path).
+
+def ascii_art(p, theme, x, y):
+    """The avatar as an ASCII portrait (scripts/ascii.json, made by scripts/ascii.py), painted into the sky.
+
+    Glyphs take the theme gradient with only a hint of the painting's own colour.
+    Rows fade in one by one, the bottom dissolves into the waves, and a light band
+    sweeps through the glyphs only (the text itself is the clip path).
     """
-    lines = open(os.path.join(HERE, "art.txt"), encoding="utf-8").read().rstrip("\n").split("\n")
-    fs, lh = 10.5, 12
-    cols = max(len(l) for l in lines)
-    aw, ah = cols * fs * CW, len(lines) * lh
-    tw_, th_ = 250, 250
-    ox, oy = x + (tw_ - aw) / 2, y + (th_ - ah) / 2
-    rows = [f'<text x="{ox:.1f}" y="{oy + (i + 1) * lh - 2:.1f}" font-size="{fs}" font-weight="700">{X(l)}</text>'
-            for i, l in enumerate(lines)]
-    out = [f'<linearGradient id="artG" gradientUnits="userSpaceOnUse" x1="0" y1="{oy}" x2="0" y2="{oy + ah}">'
-           f'<stop offset="0" stop-color="{p["a"]}"/><stop offset="1" stop-color="{p["b"]}"/></linearGradient>',
-           f'<linearGradient id="artFadeG" x1="0" y1="0" x2="0" y2="1"><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>',
-           f'<mask id="artFade"><rect x="{x}" y="{oy}" width="{tw_}" height="{ah + 4:.0f}" fill="url(#artFadeG)"/></mask>',
-           f'<clipPath id="asc">{"".join(rows)}</clipPath>',
-           f'<radialGradient id="artGlow"><stop offset="0" stop-color="{p["a"]}" stop-opacity=".18"/><stop offset="1" stop-color="{p["a"]}" stop-opacity="0"/></radialGradient>',
-           f'<ellipse cx="{ox + aw / 2:.0f}" cy="{oy + ah * .55:.0f}" rx="{aw * .75:.0f}" ry="{ah * .6:.0f}" fill="url(#artGlow)"/>',
-           f'<g mask="url(#artFade)" opacity="{.85 if theme == "dark" else .9}">']
-    for i, r in enumerate(rows):
-        out.append(r.replace("<text ", f'<text class="row" style="animation-delay:{.2 + i * .06:.2f}s" fill="url(#artG)" ', 1))
-    out.append(f'<g clip-path="url(#asc)"><rect class="scan" x="{x}" y="{y - 30}" width="{tw_}" height="26" fill="url(#scanG)"/></g></g>')
+    A = json.load(open(os.path.join(HERE, "ascii.json")))
+    fs, lh, cols = A["fs"], A["lh"], A["cols"]
+    aw, ah = cols * fs * CW, A["rows"] * lh
+    ox, oy = x, y
+    bg = p["sky2"]
+    rows_txt, rows_clip = [], []
+    for r, row in enumerate(A["grid"]):
+        base = mix(p["a"], p["b"], r / max(1, A["rows"] - 1))
+        spans, last, buf = [], None, ""
+        for w, l, R, G, B in row:
+            w = w ** .6 if w > 0 else 0
+            k = 0 if w < .12 else min(len(RAMP) - 1, 1 + int((w - .12) / .88 * (len(RAMP) - 1)))
+            c = mix(base, f"#{R:02x}{G:02x}{B:02x}", .22)
+            if theme == "dark":
+                c = mix(mix(c, "#ffffff", .3 * l), bg, .3 * (1 - w))
+            else:
+                c = mix(mix(c, "#000000", .3), bg, .25 * (1 - w))
+            c = c[:2] + c[2] + c[4] + c[4] + c[6] + c[6]  # quantise so runs merge
+            ch = RAMP[k]
+            if ch == " ":
+                c = last or c
+            if c != last and buf:
+                spans.append(f'<tspan fill="{last}">{X(buf)}</tspan>')
+                buf = ""
+            last, buf = c, buf + ch
+        if buf:
+            spans.append(f'<tspan fill="{last}">{X(buf)}</tspan>')
+        yy = oy + (r + 1) * lh - 1
+        attrs = f'x="{ox:.1f}" y="{yy:.1f}" font-size="{fs}" font-weight="800" textLength="{aw:.1f}" lengthAdjust="spacingAndGlyphs"'
+        rows_txt.append(f'<text class="row" style="animation-delay:{.2 + r * .035:.2f}s" {attrs}>{"".join(spans)}</text>')
+        plain = "".join(RAMP[0 if (w ** .6 if w > 0 else 0) < .12 else min(len(RAMP) - 1, 1 + int(((w ** .6) - .12) / .88 * (len(RAMP) - 1)))] for w, *_ in row)
+        rows_clip.append(f'<text {attrs}>{X(plain)}</text>')
+    out = [f'<linearGradient id="artFadeG" x1="0" y1="0" x2="0" y2="1"><stop offset=".8" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient>',
+           f'<mask id="artFade"><rect x="{ox - 4}" y="{oy}" width="{aw + 8:.0f}" height="{ah + 4:.0f}" fill="url(#artFadeG)"/></mask>',
+           f'<clipPath id="asc">{"".join(rows_clip)}</clipPath>',
+           f'<radialGradient id="artGlow"><stop offset="0" stop-color="{p["a"]}" stop-opacity=".16"/><stop offset="1" stop-color="{p["a"]}" stop-opacity="0"/></radialGradient>',
+           f'<ellipse cx="{ox + aw / 2:.0f}" cy="{oy + ah * .5:.0f}" rx="{aw * .8:.0f}" ry="{ah * .6:.0f}" fill="url(#artGlow)"/>',
+           f'<g mask="url(#artFade)">{"".join(rows_txt)}',
+           f'<g clip-path="url(#asc)"><rect class="scan" x="{ox}" y="{oy - 30}" width="{aw:.0f}" height="26" fill="url(#scanG)"/></g></g>']
     return "".join(out)
 
 
 def banner(cfg, D, p, theme, avatar):
-    H = 270
+    H = 290
     rnd = random.Random(1923)
     P = 280  # wave period: the tile scrolls by exactly one period, so the loop is seamless
     defs = f"""<clipPath id="bc"><rect width="{W}" height="{H}" rx="24"/></clipPath>
@@ -346,16 +370,16 @@ def banner(cfg, D, p, theme, avatar):
     s.append(f'<circle cx="{W - 70}" cy="58" r="60" fill="url(#glow)"/>')
     s.append(f'<circle cx="{W - 70}" cy="58" r="19" fill="{p["moon"]}" mask="url(#cres)"/>')
     span = W + P
-    s.append(ascii_art(p, theme, 18, 10))  # behind the waves, so it sinks into them
-    s.append(f'<g class="w3" opacity=".10"><path d="{wave(12, P, 214, span, H, 1.3)}" fill="url(#hlh)"/></g>')
-    s.append(f'<g class="w2" opacity=".16"><path d="{wave(9, P, 232, span, H, 0.4)}" fill="url(#hlh)"/></g>')
-    s.append(f'<g class="w1" opacity=".24"><path d="{wave(7, P, 248, span, H, 2.2)}" fill="url(#hlh)"/></g>')
+    s.append(ascii_art(p, theme, 40, 10))  # behind the waves, so it sinks into them
+    s.append(f'<g class="w3" opacity=".10"><path d="{wave(12, P, 232, span, H, 1.3)}" fill="url(#hlh)"/></g>')
+    s.append(f'<g class="w2" opacity=".16"><path d="{wave(9, P, 252, span, H, 0.4)}" fill="url(#hlh)"/></g>')
+    s.append(f'<g class="w1" opacity=".24"><path d="{wave(7, P, 268, span, H, 2.2)}" fill="url(#hlh)"/></g>')
     s.append("</g>")
     # name + rotating line
     x0 = 290
-    s.append(f'<g class="in" style="animation-delay:.1s"><text x="{x0}" y="86" font-size="18" fill="{p["muted"]}">{X(cfg["greeting"])}</text></g>')
-    s.append(f'<g class="in" style="animation-delay:.25s"><text x="{x0 - 3}" y="146" font-size="58" font-weight="800" fill="url(#hlh)" letter-spacing="-1">{X(cfg["name"])}</text></g>')
-    lines, fs, ty = cfg["roles"], 16, 182
+    s.append(f'<g class="in" style="animation-delay:.1s"><text x="{x0}" y="98" font-size="18" fill="{p["muted"]}">{X(cfg["greeting"])}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.25s"><text x="{x0 - 3}" y="158" font-size="58" font-weight="800" fill="url(#hlh)" letter-spacing="-1">{X(cfg["name"])}</text></g>')
+    lines, fs, ty = cfg["roles"], 16, 194
     ids = [f"r{i}" for i in range(len(lines))]
     for i, line in enumerate(lines):
         width = tw(line, fs)
@@ -374,9 +398,9 @@ def banner(cfg, D, p, theme, avatar):
     for i, c in enumerate(cfg["chips"]):
         cw = 12 + 16 + 8 + tw(c["label"], 12.5) + 14
         s.append(f'<g class="in" style="animation-delay:{.5 + i * .08:.2f}s">'
-                 f'<rect x="{cx}" y="204" width="{cw:.0f}" height="30" rx="10" fill="{p["c1"]}" fill-opacity=".9"/>'
-                 + icon(c["icon"], cx + 12, 211, 16, p["a"] if not c["icon"].startswith("brand:") else None, theme, p)
-                 + f'<text x="{cx + 36}" y="223.5" font-size="12.5" fill="{p["text"]}">{X(c["label"])}</text></g>')
+                 f'<rect x="{cx}" y="218" width="{cw:.0f}" height="30" rx="10" fill="{p["c1"]}" fill-opacity=".9"/>'
+                 + icon(c["icon"], cx + 12, 225, 16, p["a"] if not c["icon"].startswith("brand:") else None, theme, p)
+                 + f'<text x="{cx + 36}" y="237.5" font-size="12.5" fill="{p["text"]}">{X(c["label"])}</text></g>')
         cx += cw + 8
     return doc(W, H, "".join(s), p, (400, 700, 800), defs, css, f"{cfg['name']}: " + " / ".join(lines))
 

@@ -8,34 +8,158 @@
     "I make apps for Linux, Windows and Android."
   ],
   "chips": [
-    { "icon": "location_on", "label": "Turkey" },
-    { "icon": "brand:hyprland", "label": "CachyOS + Hyprland" }
+    {
+      "icon": "location_on",
+      "label": "Turkey"
+    },
+    {
+      "icon": "brand:hyprland",
+      "label": "CachyOS + Hyprland"
+    }
+  ],
+  "portrait_crop": [
+    0.1,
+    0.1,
+    0.8,
+    0.98
   ],
   "about": [
-    { "icon": "school", "label": "Engineering student" },
-    { "icon": "brand:hyprland", "label": "Daily drives Hyprland" },
-    { "icon": "brand:android", "label": "Desktop and Android apps" },
-    { "icon": "memory", "label": "Into reverse engineering" }
+    {
+      "icon": "school",
+      "label": "Engineering student"
+    },
+    {
+      "icon": "brand:hyprland",
+      "label": "Daily drives Hyprland"
+    },
+    {
+      "icon": "brand:android",
+      "label": "Desktop and Android apps"
+    },
+    {
+      "icon": "memory",
+      "label": "Into reverse engineering"
+    }
   ],
   "stack": [
-    { "title": "main", "items": [["rust", "Rust"], ["python", "Python"], ["kotlin", "Kotlin"], ["cplusplus", "C++"], ["dotnet", "C#"]] },
-    { "title": "tools", "items": [["archlinux", "Arch"], ["hyprland", "Hyprland"], ["tauri", "Tauri"], ["docker", "Docker"], ["git", "Git"], ["claude", "Claude Code"]] }
+    {
+      "title": "main",
+      "items": [
+        [
+          "rust",
+          "Rust"
+        ],
+        [
+          "python",
+          "Python"
+        ],
+        [
+          "kotlin",
+          "Kotlin"
+        ],
+        [
+          "cplusplus",
+          "C++"
+        ],
+        [
+          "dotnet",
+          "C#"
+        ]
+      ]
+    },
+    {
+      "title": "tools",
+      "items": [
+        [
+          "archlinux",
+          "Arch"
+        ],
+        [
+          "hyprland",
+          "Hyprland"
+        ],
+        [
+          "tauri",
+          "Tauri"
+        ],
+        [
+          "docker",
+          "Docker"
+        ],
+        [
+          "git",
+          "Git"
+        ],
+        [
+          "claude",
+          "Claude Code"
+        ]
+      ]
+    }
   ],
   "projects": [
-    { "repo": "logical-lunge", "icon": "desktop_windows", "text": "Hyprland-style desktop environment for Windows 10 and 11." },
-    { "repo": "Aegis-Authleniticator-Linux", "title": "aegis-linux", "icon": "key", "text": "Linux desktop client for Aegis 2FA vaults, written in Rust." },
-    { "repo": "ByteForge", "icon": "memory", "text": "Reverse engineering and modding toolkit for apps and games." },
-    { "repo": "AsenaPlug", "icon": "vpn_lock", "text": "DPI and DNS censorship bypass. Tray app plus Android." }
+    {
+      "repo": "logical-lunge",
+      "icon": "desktop_windows",
+      "text": "Hyprland-style desktop environment for Windows 10 and 11."
+    },
+    {
+      "repo": "Aegis-Authleniticator-Linux",
+      "title": "aegis-linux",
+      "icon": "key",
+      "text": "Linux desktop client for Aegis 2FA vaults, written in Rust."
+    },
+    {
+      "repo": "ByteForge",
+      "icon": "memory",
+      "text": "Reverse engineering and modding toolkit for apps and games."
+    },
+    {
+      "repo": "AsenaPlug",
+      "icon": "vpn_lock",
+      "text": "DPI and DNS censorship bypass. Tray app plus Android."
+    }
   ],
-  "dock": ["hyprland", "archlinux", "rust", "python", "kotlin", "android", "tauri", "docker", "git", "claude"],
+  "dock": [
+    "hyprland",
+    "archlinux",
+    "rust",
+    "python",
+    "kotlin",
+    "android",
+    "tauri",
+    "docker",
+    "git",
+    "claude"
+  ],
   "buttons": [
-    { "icon": "language", "label": "kaanalper.github.io", "url": "https://kaanalper.github.io" },
-    { "icon": "book_2", "label": "all repositories", "url": "https://github.com/KaanAlper?tab=repositories" }
+    {
+      "icon": "language",
+      "label": "kaanalper.github.io",
+      "url": "https://kaanalper.github.io"
+    },
+    {
+      "icon": "book_2",
+      "label": "all repositories",
+      "url": "https://github.com/KaanAlper?tab=repositories"
+    }
   ],
   "socials": [
-    { "icon": "instagram", "url": "https://www.instagram.com/kaan__alper/" },
-    { "icon": "x", "url": "https://x.com/Kaan__Alper" },
-    { "icon": "anilist", "url": "https://anilist.co/user/KaanAlper/" },
-    { "icon": "steam", "url": "https://steamcommunity.com/id/kaanalper" }
+    {
+      "icon": "instagram",
+      "url": "https://www.instagram.com/kaan__alper/"
+    },
+    {
+      "icon": "x",
+      "url": "https://x.com/Kaan__Alper"
+    },
+    {
+      "icon": "anilist",
+      "url": "https://anilist.co/user/KaanAlper/"
+    },
+    {
+      "icon": "steam",
+      "url": "https://steamcommunity.com/id/kaanalper"
+    }
   ]
 }
