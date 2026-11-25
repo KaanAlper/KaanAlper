@@ -48,12 +48,34 @@ def main():
     small = im.resize((cols, ROWS), Image.LANCZOS)
     msmall = mask.resize((cols, ROWS), Image.BOX)
     lum = ImageOps.autocontrast(small.convert("L"), cutoff=3)
+    # keep only the biggest connected blob (the figure), drop table/paper crumbs
+    erase = cfg.get("portrait_erase", [])  # [l, t, r, b] boxes, fractions of the crop
+    def erased(x, y):
+        return any(l_ * cols <= x < r_ * cols and t_ * ROWS <= y < b_ * ROWS for l_, t_, r_, b_ in erase)
+    on = {(x, y) for y in range(ROWS) for x in range(cols)
+          if msmall.getpixel((x, y)) / 255 >= 0.18 and not erased(x, y)}
+    best, seen = set(), set()
+    for start in on:
+        if start in seen:
+            continue
+        comp, stack = set(), [start]
+        seen.add(start)
+        while stack:
+            cx, cy = stack.pop()
+            comp.add((cx, cy))
+            for dx in (-1, 0, 1):
+                for dy in (-1, 0, 1):
+                    n = (cx + dx, cy + dy)
+                    if n in on and n not in seen:
+                        seen.add(n)
+                        stack.append(n)
+        if len(comp) > len(best):
+            best = comp
     grid = []
     for y in range(ROWS):
         row = []
         for x in range(cols):
-            m = msmall.getpixel((x, y)) / 255
-            m = 0.0 if m < 0.18 else m
+            m = msmall.getpixel((x, y)) / 255 if (x, y) in best else 0.0
             L = lum.getpixel((x, y)) / 255
             w = min(1.0, m * (0.55 + 0.6 * L))
             R, G, B = small.getpixel((x, y))
