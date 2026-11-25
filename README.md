@@ -18,6 +18,16 @@
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/dock-dark.svg"><img src="assets/dock-light.svg" width="100%" alt="Toolbox"></picture>
 
-<a href="https://kaanalper.github.io"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/button-0-dark.svg"><img src="assets/button-0-light.svg" width="auto" alt="kaanalper.github.io"></picture></a>&nbsp;<a href="https://github.com/KaanAlper?tab=repositories"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/button-1-dark.svg"><img src="assets/button-1-light.svg" width="auto" alt="all repositories"></picture></a>&nbsp;<a href="https://www.instagram.com/kaan__alper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/social-instagram-dark.svg"><img src="assets/social-instagram-light.svg" width="auto" alt="instagram"></picture></a>&nbsp;<a href="https://x.com/Kaan__Alper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/social-x-dark.svg"><img src="assets/social-x-light.svg" width="auto" alt="x"></picture></a>&nbsp;<a href="https://anilist.co/user/KaanAlper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/social-anilist-dark.svg"><img src="assets/social-anilist-light.svg" width="auto" alt="anilist"></picture></a>&nbsp;<a href="https://steamcommunity.com/id/kaanalper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/social-steam-dark.svg"><img src="assets/social-steam-light.svg" width="auto" alt="steam"></picture></a>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-dark.svg"><img src="assets/contact-light.svg" width="100%" alt="Contact"></picture>
+
+<a href="https://www.instagram.com/kaan__alper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-instagram-dark.svg"><img src="assets/contact-instagram-light.svg" width="49%" alt="Instagram: @kaan__alper"></picture></a>&nbsp;<a href="https://x.com/Kaan__Alper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-x-dark.svg"><img src="assets/contact-x-light.svg" width="49%" alt="X: @Kaan__Alper"></picture></a>
+
+<a href="https://anilist.co/user/KaanAlper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-anilist-dark.svg"><img src="assets/contact-anilist-light.svg" width="49%" alt="AniList: KaanAlper"></picture></a>&nbsp;<a href="https://steamcommunity.com/id/kaanalper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-steam-dark.svg"><img src="assets/contact-steam-light.svg" width="49%" alt="Steam: kaanalper"></picture></a>
+
+<a href="mailto:kaanalperkaraaslan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-gmail-dark.svg"><img src="assets/contact-gmail-light.svg" width="100%" alt="Email: kaanalperkaraaslan@gmail.com"></picture></a>
+
+<br>
+
+<a href="https://kaanalper.github.io"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/button-0-dark.svg"><img src="assets/button-0-light.svg" width="auto" alt="My website"></picture></a>&nbsp;&nbsp;<a href="https://github.com/KaanAlper?tab=repositories"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/button-1-dark.svg"><img src="assets/button-1-light.svg" width="auto" alt="All repositories"></picture></a>
 
 </div>

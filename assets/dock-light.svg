@@ -7,13 +7,14 @@
 </defs>
 <style>
 
-text{font-family:KM,'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre}
+text{white-space:pre}
+text:not([font-family]){font-family:RB,Rubik,'Google Sans',system-ui,sans-serif}
 .in{animation:in .7s cubic-bezier(.2,.8,.2,1) both}
 @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.fade{animation:fade .6s ease-out both}
-@keyframes fade{from{opacity:0}to{opacity:1}}
-.blink{animation:bl 1.1s steps(1) infinite}
-@keyframes bl{50%{opacity:0}}
+.flo{animation:flo 4.5s ease-in-out infinite}
+@keyframes flo{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.rot{animation:rot 24s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes rot{to{transform:rotate(360deg)}}
 .bob{animation:bob 2.8s ease-in-out infinite}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}

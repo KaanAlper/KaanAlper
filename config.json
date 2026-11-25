@@ -143,31 +143,47 @@
   "buttons": [
     {
       "icon": "language",
-      "label": "kaanalper.github.io",
+      "label": "My website",
       "url": "https://kaanalper.github.io"
     },
     {
       "icon": "book_2",
-      "label": "all repositories",
+      "label": "All repositories",
       "url": "https://github.com/KaanAlper?tab=repositories"
     }
   ],
-  "socials": [
+  "contact_note": "DMs are open, I usually answer within a day.",
+  "contacts": [
     {
       "icon": "instagram",
+      "label": "Instagram",
+      "handle": "@kaan__alper",
       "url": "https://www.instagram.com/kaan__alper/"
     },
     {
       "icon": "x",
+      "label": "X",
+      "handle": "@Kaan__Alper",
       "url": "https://x.com/Kaan__Alper"
     },
     {
       "icon": "anilist",
+      "label": "AniList",
+      "handle": "KaanAlper",
       "url": "https://anilist.co/user/KaanAlper/"
     },
     {
       "icon": "steam",
+      "label": "Steam",
+      "handle": "kaanalper",
       "url": "https://steamcommunity.com/id/kaanalper"
+    },
+    {
+      "icon": "gmail",
+      "label": "Email",
+      "handle": "kaanalperkaraaslan@gmail.com",
+      "url": "mailto:kaanalperkaraaslan@gmail.com",
+      "wide": true
     }
   ]
 }
