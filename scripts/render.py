@@ -271,29 +271,33 @@ def _glyph(w):
     return 0 if w < .12 else min(len(RAMP) - 1, 1 + int((w - .12) / .88 * (len(RAMP) - 1)))
 
 
-def ascii_art(p, theme, x, y, bg):
+def ascii_art(p, theme, x, y, bg, ink=None, static=False):
     """The avatar as an ASCII portrait (scripts/ascii.json, made by scripts/ascii.py).
 
-    Glyphs take the theme gradient with only a hint of the painting's colour.
-    Rows fade in one by one, the feet dissolve into the waves, and a light band
-    sweeps through the glyphs only (the text itself is the clip path).
+    With ink=(top, bottom) the glyphs are a single ink fading top to bottom, like a
+    printed card; otherwise they take the theme gradient with a hint of the painting's
+    colour. Unless static, rows fade in and a light band sweeps through the glyphs.
     """
     A = json.load(open(os.path.join(HERE, "ascii.json")))
     fs, lh, cols = A["fs"], A["lh"], A["cols"]
     aw, ah = cols * fs * CW, A["rows"] * lh
     rows_txt, rows_clip = [], []
     for r, row in enumerate(A["grid"]):
-        base = mix(p["a"], p["b"], r / max(1, A["rows"] - 1))
+        t = r / max(1, A["rows"] - 1)
+        base = mix(ink[0], ink[1], t) if ink else mix(p["a"], p["b"], t)
         spans, last, buf = [], None, ""
         for w, l, R, G, B in row:
             k = _glyph(w)
             ww = w ** .6 if w > 0 else 0
-            c = mix(base, f"#{R:02x}{G:02x}{B:02x}", .2)
-            if theme == "dark":
-                c = mix(mix(c, "#ffffff", .3 * l), bg, .3 * (1 - ww))
+            if ink:
+                c = mix(base, bg, .5 * (1 - ww))
             else:
-                c = mix(mix(c, "#000000", .3), bg, .25 * (1 - ww))
-            c = c[:2] + c[2] + c[4] + c[4] + c[6] + c[6]  # quantise so runs merge
+                c = mix(base, f"#{R:02x}{G:02x}{B:02x}", .2)
+                if theme == "dark":
+                    c = mix(mix(c, "#ffffff", .3 * l), bg, .3 * (1 - ww))
+                else:
+                    c = mix(mix(c, "#000000", .3), bg, .25 * (1 - ww))
+            c = "#" + c[1] * 2 + c[3] * 2 + c[5] * 2  # quantise to #rgb steps so runs merge
             ch = RAMP[k]
             if ch == " ":
                 c = last or c
@@ -305,8 +309,11 @@ def ascii_art(p, theme, x, y, bg):
             spans.append(f'<tspan fill="{last}">{X(buf)}</tspan>')
         attrs = (f'{MONO} x="{x:.1f}" y="{y + (r + 1) * lh - 1:.1f}" font-size="{fs}" font-weight="800" '
                  f'textLength="{aw:.1f}" lengthAdjust="spacingAndGlyphs"')
-        rows_txt.append(f'<text class="row" style="animation-delay:{.2 + r * .035:.2f}s" {attrs}>{"".join(spans)}</text>')
+        cls = "" if static else f'class="row" style="animation-delay:{.2 + r * .035:.2f}s" '
+        rows_txt.append(f'<text {cls}{attrs}>{"".join(spans)}</text>')
         rows_clip.append(f'<text {attrs}>{X("".join(RAMP[_glyph(w)] for w, *_ in row))}</text>')
+    if static:
+        return "".join(rows_txt)
     return "".join([
         f'<linearGradient id="artFadeG" x1="0" y1="0" x2="0" y2="1"><stop offset=".82" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity=".1"/></linearGradient>',
         f'<mask id="artFade"><rect x="{x - 4}" y="{y - 4}" width="{aw + 8:.0f}" height="{ah + 8:.0f}" fill="url(#artFadeG)"/></mask>',
@@ -315,25 +322,71 @@ def ascii_art(p, theme, x, y, bg):
         f'<g clip-path="url(#asc)"><rect class="scan" x="{x}" y="{y - 30}" width="{aw:.0f}" height="26" fill="url(#scanG)"/></g></g>'])
 
 
-def pixel_card(cx, cy, w, h, rot, p, seed, border):
-    """Back card: a tilted sticker card filled with a chunky pixel pattern in the theme colours."""
-    rnd = random.Random(seed)
-    cell = 14
-    cells = []
-    cols, rows = int(w // cell) + 1, int(h // cell) + 1
-    for j in range(rows):
-        for i in range(cols):
-            v = rnd.random() + (j / rows) * .25
-            if v > .72:
-                c = p["a"] if rnd.random() < .6 else p["b"]
-                op = .5 + rnd.random() * .5
-                cells.append(f'<rect x="{-w / 2 + i * cell}" y="{-h / 2 + j * cell}" width="{cell}" height="{cell}" fill="{c}" opacity="{op:.2f}"/>')
-    cid = f"pc{seed}"
+CARD_FACE, CARD_INK, CARD_INK2 = "#0c1a2b", "#7fdcff", "#5ff2c0"
+
+
+def crescent(cx, cy, r, color, mid):
+    """Small crescent moon: the 'suit' of this deck."""
+    return (f'<mask id="{mid}"><rect x="{cx - r * 2}" y="{cy - r * 2}" width="{r * 4}" height="{r * 4}" fill="#fff"/>'
+            f'<circle cx="{cx + r * .45:.1f}" cy="{cy - r * .35:.1f}" r="{r * .85:.1f}" fill="#000"/></mask>'
+            f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="{color}" mask="url(#{mid})"/>')
+
+
+def card_back(cx, cy, w, h, rot, seed, border):
+    """Playing-card back: navy stock, fine diamond lattice, crescent medallion."""
+    x0, y0, ins = -w / 2, -h / 2, 10
+    lines, step = [], 13
+    for k in range(-int(h), int(w + h), step):
+        lines.append(f'<line x1="{x0 + k}" y1="{y0}" x2="{x0 + k + h}" y2="{y0 + h}"/>')
+        lines.append(f'<line x1="{x0 + k}" y1="{y0 + h}" x2="{x0 + k + h}" y2="{y0}"/>')
+    cid = f"cb{seed}"
     return (f'<g transform="translate({cx} {cy}) rotate({rot})">'
-            f'<clipPath id="{cid}"><rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16"/></clipPath>'
-            f'<rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16" fill="{p["c2"]}"/>'
-            f'<g clip-path="url(#{cid})">{"".join(cells)}</g>'
-            f'<rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16" fill="none" stroke="{border}" stroke-width="5"/></g>')
+            f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="{CARD_FACE}"/>'
+            f'<clipPath id="{cid}"><rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7"/></clipPath>'
+            f'<g clip-path="url(#{cid})" stroke="{CARD_INK}" stroke-width=".8" opacity=".28">{"".join(lines)}</g>'
+            f'<rect x="{x0 + ins}" y="{y0 + ins}" width="{w - 2 * ins}" height="{h - 2 * ins}" rx="7" fill="none" stroke="{CARD_INK}" stroke-width="1.2" opacity=".75"/>'
+            f'<rect x="{x0 + ins + 4}" y="{y0 + ins + 4}" width="{w - 2 * ins - 8}" height="{h - 2 * ins - 8}" rx="5" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".5"/>'
+            f'<circle cx="0" cy="0" r="22" fill="{CARD_FACE}" stroke="{CARD_INK}" stroke-width="1.2"/>'
+            f'<circle cx="0" cy="0" r="17" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".7"/>'
+            + crescent(0, 0, 9, CARD_INK, f"cm{seed}")
+            + f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="none" stroke="{border}" stroke-width="5"/></g>')
+
+
+def joker_card(cx, cy, rot, cfg, border):
+    """Front card: a Joker in the deck's ink, with corner indices and a framed portrait."""
+    w, h = 172, 240
+    x0, y0 = -w / 2, -h / 2
+    fx, fy, fw, fh = x0 + 26, y0 + 16, w - 52, h - 32  # inner frame
+    s = [f'<g transform="translate({cx} {cy}) rotate({rot})">',
+         f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="{CARD_FACE}"/>',
+         f'<rect x="{fx}" y="{fy}" width="{fw}" height="{fh}" rx="4" fill="none" stroke="{CARD_INK}" stroke-width="1.2"/>',
+         f'<rect x="{fx + 4}" y="{fy + 4}" width="{fw - 8}" height="{fh - 8}" rx="2" fill="none" stroke="{CARD_INK2}" stroke-width=".6" opacity=".6"/>']
+    for dx, dy in ((fx, fy), (fx + fw, fy), (fx, fy + fh), (fx + fw, fy + fh)):
+        s.append(f'<rect x="{dx - 3.5}" y="{dy - 3.5}" width="7" height="7" fill="{CARD_FACE}" stroke="{CARD_INK}" stroke-width="1" transform="rotate(45 {dx} {dy})"/>')
+    # portrait, fitted to the frame
+    A = json.load(open(os.path.join(HERE, "ascii.json")))
+    fs_, lh_ = A["fs"], A["lh"]
+    lit = [(c, r) for r, row in enumerate(A["grid"]) for c, cell in enumerate(row) if _glyph(cell[0])]
+    c0, c1 = min(c for c, _ in lit), max(c for c, _ in lit) + 1
+    r0, r1 = min(r for _, r in lit), max(r for _, r in lit) + 1
+    bx, by, bw, bh = c0 * fs_ * CW, r0 * lh_, (c1 - c0) * fs_ * CW, (r1 - r0) * lh_
+    aw_, ah_ = fw - 14, fh - 40
+    sc = min(aw_ / bw, ah_ / bh)
+    acy = fy + 10 + ah_ / 2
+    tx, ty = -(bx + bw / 2) * sc, acy - (by + bh / 2) * sc
+    s.append(f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">'
+             f'{ascii_art(PAL["dark"], "dark", 0, 0, CARD_FACE, ink=(CARD_INK, CARD_INK2), static=True)}</g>')
+    # caption in the frame
+    cap = "@" + cfg["login"]
+    s.append(f'<line x1="{fx + 10}" y1="{fy + fh - 22}" x2="{fx + fw - 10}" y2="{fy + fh - 22}" stroke="{CARD_INK}" stroke-width=".6" opacity=".6"/>'
+             f'<text {MONO} x="0" y="{fy + fh - 9}" font-size="9.5" font-weight="700" fill="{CARD_INK}" text-anchor="middle" letter-spacing=".5">{X(cap)}</text>')
+    # corner indices: JOKER stacked + crescent suit, mirrored at the bottom right
+    idx = "".join(f'<text {MONO} x="{x0 + 13}" y="{y0 + 24 + i * 11.5}" font-size="11" font-weight="800" fill="{CARD_INK}" text-anchor="middle">{ch}</text>'
+                  for i, ch in enumerate("JOKER"))
+    s.append(idx + crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, CARD_INK2, "jk1"))
+    s.append(f'<g transform="rotate(180)">{idx}{crescent(x0 + 13, y0 + 24 + 5 * 11.5 + 3, 5, CARD_INK2, "jk2")}</g>')
+    s.append(f'<rect x="{x0}" y="{y0}" width="{w}" height="{h}" rx="14" fill="none" stroke="{border}" stroke-width="5"/></g>')
+    return "".join(s)
 
 
 def banner(cfg, D, p, theme):
@@ -344,10 +397,14 @@ def banner(cfg, D, p, theme):
     P = 300
     page = theme
     # the panel is bright pastel in both themes so it pops off the page; the portrait card stays dark
-    p = dict(PAL["light"], sky1="#c4ecff", sky2="#c9fbe6", a="#1fb6f0", b="#00d27c", text="#0d2132",
-             muted="#3a5870", c1="#ffffff", c2="#e4f3fb")
-    dark = PAL["dark"]
-    theme = "light"
+    if page == "dark":  # deep aurora panel: still lifts off the page, but stays a night scene
+        p = dict(PAL["dark"], sky1="#12395a", sky2="#0f4c48", a="#33ccff", b="#00e08a", text="#f2f8ff",
+                 muted="#a9c4d8", c1="#10233a", c2="#16304a")
+        stripe_white = .12
+    else:
+        p = dict(PAL["light"], sky1="#c4ecff", sky2="#c9fbe6", a="#1fb6f0", b="#00d27c", text="#0d2132",
+                 muted="#3a5870", c1="#ffffff", c2="#e4f3fb")
+        stripe_white = .6
     border = "#ffffff"
     defs = f"""<clipPath id="panel"><rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="18"/></clipPath>
 <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{p['sky1']}"/><stop offset="1" stop-color="{p['sky2']}"/></linearGradient>
@@ -355,7 +412,7 @@ def banner(cfg, D, p, theme):
 <filter id="drop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="{.5 if page == 'dark' else .2}"/></filter>
 <linearGradient id="scanG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient>"""
     css = f"""
-.st1{{animation:st 9s linear infinite}}.st2{{animation:st 13s linear infinite reverse}}.st3{{animation:st 17s linear infinite}}
+.st1{{animation:st 40s linear infinite}}.st2{{animation:st 55s linear infinite reverse}}.st3{{animation:st 70s linear infinite}}
 @keyframes st{{to{{transform:translateX(-{P}px)}}}}
 .tw{{animation:tw 3.2s ease-in-out infinite}}
 @keyframes tw{{0%,100%{{opacity:.15}}50%{{opacity:1}}}}
@@ -378,53 +435,17 @@ def banner(cfg, D, p, theme):
         s.append(f'<circle class="tw" cx="{rnd.uniform(px, W):.0f}" cy="{rnd.uniform(py, py + ph):.0f}" r="{rnd.uniform(.5, 1.4):.2f}" fill="{p["moon"]}" style="animation-delay:-{rnd.uniform(0, 3):.2f}s"/>')
     span = 1400 + P
     s.append(f'<g transform="rotate(-28 470 150)" filter="url(#soft)">'
-             f'<g class="st1"><path d="{wave(10, P, 40, span, 120)}" transform="translate(-300 0)" fill="{p["a"]}" opacity=".55"/></g>'
-             f'<g class="st2"><path d="{wave(9, P, 120, span, 170, 1.7)}" transform="translate(-300 0)" fill="#ffffff" opacity=".75"/></g>'
-             f'<g class="st3"><path d="{wave(12, P, 170, span, 260, .8)}" transform="translate(-300 0)" fill="{p["b"]}" opacity=".45"/></g>'
+             f'<g class="st1"><path d="{wave(10, P, 40, span, 120)}" transform="translate(-300 0)" fill="{p["a"]}" opacity=".4"/></g>'
+             f'<g class="st2"><path d="{wave(9, P, 120, span, 170, 1.7)}" transform="translate(-300 0)" fill="#ffffff" opacity="{stripe_white}"/></g>'
+             f'<g class="st3"><path d="{wave(12, P, 170, span, 260, .8)}" transform="translate(-300 0)" fill="{p["b"]}" opacity=".32"/></g>'
              f'<g class="st2"><path d="{wave(10, P, 260, span, 330, 2.4)}" transform="translate(-300 0)" fill="{p["a"]}" opacity=".35"/></g></g>')
     s.append("</g>")
-    # stacked sticker cards spilling out of the panel's left edge
-    s.append(f'<g filter="url(#drop)">')
-    s.append(f'<g class="card" style="animation-delay:-2s">{pixel_card(112, 168, 150, 214, -14, p, 3, border)}</g>')
-    s.append(f'<g class="card" style="animation-delay:-4s">{pixel_card(150, 160, 150, 214, -7, p, 5, border)}</g>')
-    # front card: a little collectible card with the ASCII portrait
-    A = json.load(open(os.path.join(HERE, "ascii.json")))
-    fs_, lh_ = A["fs"], A["lh"]
-    lit = [(c, r) for r, row in enumerate(A["grid"]) for c, cell in enumerate(row) if _glyph(cell[0])]
-    c0, c1 = min(c for c, _ in lit), max(c for c, _ in lit) + 1
-    r0, r1 = min(r for _, r in lit), max(r for _, r in lit) + 1
-    bx, by_, bw_, bh_ = c0 * fs_ * CW, r0 * lh_, (c1 - c0) * fs_ * CW, (r1 - r0) * lh_
-    cw_, ch_ = 172, 240
-    area_w, area_h, area_cy = cw_ - 26, ch_ - 62, -ch_ / 2 + 14 + (ch_ - 62) / 2
-    sc = min(area_w / bw_, area_h / bh_)
-    tx, ty = -(bx + bw_ / 2) * sc, area_cy - (by_ + bh_ / 2) * sc
-    rnd2 = random.Random(11)
-    stars = "".join(f'<circle class="tw" cx="{rnd2.uniform(-cw_ / 2, cw_ / 2):.0f}" cy="{rnd2.uniform(-ch_ / 2, 40):.0f}" r="{rnd2.uniform(.5, 1.2):.2f}" '
-                    f'fill="#e9f1ff" style="animation-delay:-{rnd2.uniform(0, 3):.1f}s"/>' for _ in range(22))
-    plate_w = tw("@" + cfg["login"], 12, mono=True) + 26
-    s.append(f'<g class="card"><g transform="translate(224 168) rotate(5)">'
-             f'<clipPath id="fc"><rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16"/></clipPath>'
-             f'<linearGradient id="fcbg" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#0a1426"/><stop offset=".65" stop-color="#0b2236"/><stop offset="1" stop-color="#0b3a3c"/></linearGradient>'
-             f'<radialGradient id="fcglow"><stop offset="0" stop-color="{dark["a"]}" stop-opacity=".35"/><stop offset="1" stop-color="{dark["a"]}" stop-opacity="0"/></radialGradient>'
-             f'<linearGradient id="foil" gradientUnits="userSpaceOnUse" x1="-60" y1="0" x2="60" y2="0" gradientTransform="rotate(25)">'
-             f'<stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="{dark["a"]}" stop-opacity=".18"/>'
-             f'<stop offset=".5" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="{dark["b"]}" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>'
-             f'<animateTransform attributeName="gradientTransform" type="translate" values="-260 0;260 0;260 0" keyTimes="0;.5;1" dur="5s" begin="1.2s" repeatCount="indefinite" additive="sum"/></linearGradient>'
-             f'<mask id="moonc"><rect x="-100" y="-140" width="200" height="280" fill="#fff"/><circle cx="{cw_ / 2 - 26 + 5}" cy="{-ch_ / 2 + 26 - 4}" r="9" fill="#000"/></mask>'
-             f'<g clip-path="url(#fc)">'
-             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" fill="url(#fcbg)"/>{stars}'
-             f'<ellipse cx="0" cy="{area_cy:.0f}" rx="{cw_ * .55:.0f}" ry="{ch_ * .4:.0f}" fill="url(#fcglow)"/>'
-             f'<circle cx="{cw_ / 2 - 26}" cy="{-ch_ / 2 + 26}" r="9" fill="#e9f1ff" mask="url(#moonc)"/>'
-             f'<path d="{wave(5, 60, ch_ / 2 - 30, cw_ + 60, ch_ / 2, 1.0)}" transform="translate({-cw_ / 2 - 30} 0)" fill="{dark["a"]}" opacity=".18"/>'
-             f'<path d="{wave(4, 50, ch_ / 2 - 20, cw_ + 60, ch_ / 2, 2.2)}" transform="translate({-cw_ / 2 - 30} 0)" fill="{dark["b"]}" opacity=".2"/>'
-             f'<g transform="translate({tx:.1f} {ty:.1f}) scale({sc:.3f})">{ascii_art(dark, "dark", 0, 0, "#0b2236")}</g>'
-             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" fill="url(#foil)"/>'
-             f'</g>'
-             f'<rect x="{-cw_ / 2 + 7}" y="{-ch_ / 2 + 7}" width="{cw_ - 14}" height="{ch_ - 14}" rx="11" fill="none" stroke="url(#hl)" stroke-width="1.2" opacity=".7"/>'
-             f'<rect x="{-plate_w / 2:.1f}" y="{ch_ / 2 - 36}" width="{plate_w:.1f}" height="22" rx="11" fill="#05070c" fill-opacity=".7" stroke="url(#hlh)" stroke-width="1"/>'
-             f'<text {MONO} x="0" y="{ch_ / 2 - 21}" font-size="12" font-weight="700" fill="#e9f1ff" text-anchor="middle">@{X(cfg["login"])}</text>'
-             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16" fill="none" stroke="{border}" stroke-width="5"/>'
-             f'</g></g></g>')
+    # a little hand of playing cards spilling out of the panel's left edge
+    s.append(f'<g filter="url(#drop)" class="in">')
+    s.append(card_back(110, 168, 150, 212, -15, 3, border))
+    s.append(card_back(150, 160, 150, 212, -7, 5, border))
+    s.append(joker_card(224, 166, 5, cfg, border))
+    s.append("</g>")
     # big chunky name with an offset shadow
     x0 = 330
     name = X(cfg["name"])
@@ -437,7 +458,7 @@ def banner(cfg, D, p, theme):
     # tiles hanging off the bottom edge of the panel
     for i, slug in enumerate(cfg["drivers"]):
         tx, ty, ts = x0 + 2 + i * 62, py + 206, 54
-        s.append(f'<g class="pop" style="animation-delay:{.6 + i * .08:.2f}s"><g class="hop" style="animation-delay:-{i * .4:.1f}s">'
+        s.append(f'<g class="pop" style="animation-delay:{.6 + i * .08:.2f}s"><g>'
                  f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="12" fill="{p["c1"]}" stroke="{border}" stroke-width="3.5" filter="url(#drop)"/>'
                  + icon("brand:" + slug, tx + 14, ty + 14, 26, None, theme, p)
                  + f'<title>{X(ICONS["brand"][slug]["t"])}</title></g></g>')
@@ -446,24 +467,32 @@ def banner(cfg, D, p, theme):
 
 
 def greet(cfg, p, theme):
-    """Big centred typing line under the hero."""
+    """Big centred typing line under the hero. Types and erases whole characters,
+    like a real terminal, instead of wiping pixels."""
     H, fs = 76, 32
+    cw = fs * CW
     lines = cfg["greetings"]
     s, ids = [], [f"g{i}" for i in range(len(lines))]
     for i, line in enumerate(lines):
-        width = tw(line, fs, mono=True)
+        n = len(line)
+        width = n * cw
         x = (W - width) / 2
-        type_t, hold, erase = len(line) * 0.07, 2.6, 0.6
-        dur = type_t + hold + erase
-        k1, k2 = type_t / dur, (type_t + hold) / dur
+        t_in, t_out, hold = 0.065, 0.03, 2.4
+        pts = [(k * t_in, k) for k in range(n + 1)]
+        pts.append((n * t_in + hold, n))
+        pts += [(n * t_in + hold + (n - k) * t_out, k) for k in range(n - 1, -1, -1)]
+        dur = pts[-1][0] + 0.25
+        kt = ";".join(f"{t / dur:.4f}" for t, _ in pts)
+        wv = ";".join(f"{k * cw + (2 if k else 0):.1f}" for _, k in pts)
+        xv = ";".join(f"{x + k * cw + 2:.1f}" for _, k in pts)
         begin = f"0s;{ids[-1]}.end" if i == 0 else f"{ids[i - 1]}.end"
-        s.append(f'<clipPath id="gc{i}"><rect x="{x - 2:.1f}" y="0" width="0" height="{H}">'
-                 f'<animate id="{ids[i]}" attributeName="width" begin="{begin}" dur="{dur:.2f}s" values="0;{width + 4:.1f};{width + 4:.1f};0" keyTimes="0;{k1:.3f};{k2:.3f};1"/>'
+        s.append(f'<clipPath id="gc{i}"><rect x="{x - 1:.1f}" y="0" width="0" height="{H}">'
+                 f'<animate id="{ids[i]}" attributeName="width" begin="{begin}" dur="{dur:.2f}s" calcMode="discrete" values="{wv}" keyTimes="{kt}"/>'
                  f'</rect></clipPath>')
         s.append(f'<g clip-path="url(#gc{i})"><text {MONO} x="{x:.1f}" y="48" font-size="{fs}" font-weight="700" fill="{p["text"]}">{X(line)}</text></g>')
         s.append(f'<rect x="{x:.1f}" y="22" width="4" height="34" rx="2" fill="{p["b"]}" opacity="0">'
                  f'<set attributeName="opacity" to="1" begin="{ids[i]}.begin" end="{ids[i]}.end"/>'
-                 f'<animate attributeName="x" begin="{ids[i]}.begin" dur="{dur:.2f}s" values="{x:.1f};{x + width + 6:.1f};{x + width + 6:.1f};{x:.1f}" keyTimes="0;{k1:.3f};{k2:.3f};1"/></rect>')
+                 f'<animate attributeName="x" begin="{ids[i]}.begin" dur="{dur:.2f}s" calcMode="discrete" values="{xv}" keyTimes="{kt}"/></rect>')
     return doc(W, H, "".join(s), p, (("KM", 700),), title=" / ".join(lines))
 
 
