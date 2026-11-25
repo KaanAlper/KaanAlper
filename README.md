@@ -1,6 +1,7 @@
 <div align="center">
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg"><img src="assets/hero-light.svg" width="100%" alt="Kaan Alper: Engineering student from Turkey. / I brought Hyprland to Windows. / I make apps for Linux, Windows and Android."></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg"><img src="assets/hero-light.svg" width="100%" alt="Kaan Alper: Engineering student from Turkey"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/greet-dark.svg"><img src="assets/greet-light.svg" width="100%" alt="merhaba, traveler! / I&#x27;m Kaan. / I make apps for Linux, Windows and Android. / Welcome to my GitHub!"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/about-dark.svg"><img src="assets/about-light.svg" width="100%" alt="About me"></picture>
 

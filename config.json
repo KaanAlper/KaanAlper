@@ -1,21 +1,21 @@
 {
   "login": "KaanAlper",
   "name": "Kaan Alper",
-  "greeting": "merhaba, I'm",
-  "roles": [
-    "Engineering student from Turkey.",
-    "I brought Hyprland to Windows.",
-    "I make apps for Linux, Windows and Android."
+  "headline": "Engineering student from Turkey",
+  "subline": "I brought Hyprland to Windows.",
+  "drivers": [
+    "hyprland",
+    "archlinux",
+    "rust",
+    "kotlin",
+    "python",
+    "claude"
   ],
-  "chips": [
-    {
-      "icon": "location_on",
-      "label": "Turkey"
-    },
-    {
-      "icon": "brand:hyprland",
-      "label": "CachyOS + Hyprland"
-    }
+  "greetings": [
+    "merhaba, traveler!",
+    "I'm Kaan.",
+    "I make apps for Linux, Windows and Android.",
+    "Welcome to my GitHub!"
   ],
   "portrait_crop": [
     0.1,

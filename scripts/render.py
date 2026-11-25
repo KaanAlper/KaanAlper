@@ -184,7 +184,7 @@ def badge(x, y, size, name, p, theme, tint, n=8, amp=0.08, spin=False, solid=Fal
     shape = f'<path d="{cookie(x + c, y + c, c / (1 + amp), n, amp)}" fill="{tint}"' + ("" if solid else ' fill-opacity=".2"') + "/>"
     if spin:
         shape = f'<g class="rot">{shape}</g>'
-    isz = size * 0.48
+    isz = size * 0.56
     fg = p["ink"] if solid else (None if name.startswith("brand:") else tint)
     return shape + icon(name, x + (size - isz) / 2, y + (size - isz) / 2, isz, fg, theme, p)
 
@@ -315,99 +315,129 @@ def ascii_art(p, theme, x, y, bg):
         f'<g clip-path="url(#asc)"><rect class="scan" x="{x}" y="{y - 30}" width="{aw:.0f}" height="26" fill="url(#scanG)"/></g></g>'])
 
 
+def pixel_card(cx, cy, w, h, rot, p, seed, border):
+    """Back card: a tilted sticker card filled with a chunky pixel pattern in the theme colours."""
+    rnd = random.Random(seed)
+    cell = 14
+    cells = []
+    cols, rows = int(w // cell) + 1, int(h // cell) + 1
+    for j in range(rows):
+        for i in range(cols):
+            v = rnd.random() + (j / rows) * .25
+            if v > .72:
+                c = p["a"] if rnd.random() < .6 else p["b"]
+                op = .5 + rnd.random() * .5
+                cells.append(f'<rect x="{-w / 2 + i * cell}" y="{-h / 2 + j * cell}" width="{cell}" height="{cell}" fill="{c}" opacity="{op:.2f}"/>')
+    cid = f"pc{seed}"
+    return (f'<g transform="translate({cx} {cy}) rotate({rot})">'
+            f'<clipPath id="{cid}"><rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16"/></clipPath>'
+            f'<rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16" fill="{p["c2"]}"/>'
+            f'<g clip-path="url(#{cid})">{"".join(cells)}</g>'
+            f'<rect x="{-w / 2}" y="{-h / 2}" width="{w}" height="{h}" rx="16" fill="none" stroke="{border}" stroke-width="5"/></g>')
+
+
 def banner(cfg, D, p, theme):
-    """Hero: a sky panel with depth. The portrait's hat and the moon break out of it."""
-    H, top, ph = 340, 44, 272  # svg height, panel top, panel height
-    pb = top + ph
-    rnd = random.Random(1923)
-    P = 280  # wave period: the tile scrolls by exactly one period, so the loop is seamless
-    defs = f"""<clipPath id="panel"><rect x="0" y="{top}" width="{W}" height="{ph}" rx="28"/></clipPath>
-<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{p['sky1']}"/><stop offset="1" stop-color="{p['sky2']}"/></linearGradient>
-<radialGradient id="glow"><stop offset="0" stop-color="{p['a']}" stop-opacity=".4"/><stop offset="1" stop-color="{p['a']}" stop-opacity="0"/></radialGradient>
-<radialGradient id="artGlow"><stop offset="0" stop-color="{p['a']}" stop-opacity=".22"/><stop offset="1" stop-color="{p['a']}" stop-opacity="0"/></radialGradient>
-<mask id="cres"><rect width="{W}" height="{H}" fill="#fff"/><circle cx="{W - 92 + 11}" cy="{40 - 8}" r="24" fill="#000"/></mask>
-<linearGradient id="band" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="{p['a']}" stop-opacity="0"/><stop offset=".5" stop-color="{p['a']}" stop-opacity=".9"/><stop offset="1" stop-color="{p['b']}" stop-opacity="0"/></linearGradient>
-<linearGradient id="scanG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient>
-<linearGradient id="shine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="260" y2="0">
-<stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-<animateTransform attributeName="gradientTransform" type="translate" values="-300 0;900 0;900 0" keyTimes="0;.45;1" dur="7s" begin="1.4s" repeatCount="indefinite"/></linearGradient>
-<filter id="shadow" x="-10%" y="-20%" width="120%" height="160%"><feGaussianBlur stdDeviation="18"/></filter>"""
+    """Hero in the spirit of a trading-card banner: tilted sticker cards spill out of a
+    striped panel, a big chunky name, and a row of little tiles hanging off the bottom."""
+    H = 330
+    px, py, pw, ph = 96, 22, W - 96, 250  # panel
+    P = 300
+    page = theme
+    # the panel is bright pastel in both themes so it pops off the page; the portrait card stays dark
+    p = dict(PAL["light"], sky1="#c4ecff", sky2="#c9fbe6", a="#1fb6f0", b="#00d27c", text="#0d2132",
+             muted="#3a5870", c1="#ffffff", c2="#e4f3fb")
+    dark = PAL["dark"]
+    theme = "light"
+    border = "#ffffff"
+    defs = f"""<clipPath id="panel"><rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="18"/></clipPath>
+<linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="{p['sky1']}"/><stop offset="1" stop-color="{p['sky2']}"/></linearGradient>
+<filter id="soft" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="2.5"/></filter>
+<filter id="drop" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="{.5 if page == 'dark' else .2}"/></filter>
+<linearGradient id="scanG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity=".25"/><stop offset="1" stop-color="#fff" stop-opacity=".9"/></linearGradient>"""
     css = f"""
+.st1{{animation:st 9s linear infinite}}.st2{{animation:st 13s linear infinite reverse}}.st3{{animation:st 17s linear infinite}}
+@keyframes st{{to{{transform:translateX(-{P}px)}}}}
 .tw{{animation:tw 3.2s ease-in-out infinite}}
 @keyframes tw{{0%,100%{{opacity:.15}}50%{{opacity:1}}}}
-.w1{{animation:wv 18s linear infinite}}.w2{{animation:wv 27s linear infinite}}.w3{{animation:wv 39s linear infinite reverse}}
-@keyframes wv{{to{{transform:translateX(-{P}px)}}}}
-.drift{{animation:drift 16s ease-in-out infinite alternate}}
-@keyframes drift{{from{{transform:translateX(-60px)}}to{{transform:translateX(60px)}}}}
-.slow{{animation:rot 40s linear infinite;transform-box:fill-box;transform-origin:center}}
+.card{{animation:card 6s ease-in-out infinite}}
+@keyframes card{{0%,100%{{transform:translateY(0) rotate(0)}}50%{{transform:translateY(-5px) rotate(.6deg)}}}}
 .row{{animation:row .5s ease-out both}}
 @keyframes row{{from{{opacity:0;transform:translateX(-6px)}}to{{opacity:1;transform:none}}}}
 .scan{{animation:scan 6s cubic-bezier(.5,0,.5,1) 2s infinite}}
 @keyframes scan{{from{{transform:translateY(0)}}to{{transform:translateY(320px)}}}}
-.bob{{animation:flo 6s ease-in-out infinite}}
+.pop{{animation:pop .55s cubic-bezier(.3,1.6,.5,1) both;transform-box:fill-box;transform-origin:center}}
+@keyframes pop{{from{{transform:scale(0) rotate(-20deg)}}to{{transform:none}}}}
+.hop{{animation:hop 3s ease-in-out infinite}}
+@keyframes hop{{0%,100%{{transform:translateY(0)}}50%{{transform:translateY(-5px)}}}}
 """
     s = []
-    # coloured glow under the panel gives it depth instead of a flat box
-    s.append(f'<rect x="60" y="{pb - 40}" width="{W - 120}" height="44" rx="22" fill="url(#hlh)" opacity="{.45 if theme == "dark" else .35}" filter="url(#shadow)"/>')
-    s.append(f'<g clip-path="url(#panel)"><rect y="{top}" width="{W}" height="{ph}" fill="url(#sky)"/>')
-    # diagonal aurora bands drifting across the sky
-    s.append(f'<g class="drift" opacity="{.16 if theme == "dark" else .22}"><g transform="rotate(-24 420 180)">'
-             f'<rect x="-200" y="60" width="1300" height="64" fill="url(#band)"/>'
-             f'<rect x="-200" y="150" width="1300" height="26" fill="url(#band)" opacity=".6"/></g></g>')
-    for _ in range(46 if theme == "dark" else 24):
-        x, y, r = rnd.uniform(0, W), rnd.uniform(top, top + 160), rnd.uniform(0.5, 1.5)
-        col = p["moon"] if theme == "dark" else p["a"]
-        s.append(f'<circle class="tw" cx="{x:.0f}" cy="{y:.0f}" r="{r:.2f}" fill="{col}" style="animation-delay:-{rnd.uniform(0, 3.2):.2f}s"/>')
-    s.append(f'<path class="slow" d="{cookie(W - 52, pb + 8, 96, 12, 0.09)}" fill="{p["a"]}" opacity=".14"/>')
+    # panel: sky + bold diagonal stripes with wavy edges, sliding
+    s.append(f'<g clip-path="url(#panel)"><rect x="{px}" y="{py}" width="{pw}" height="{ph}" fill="url(#sky)"/>')
+    rnd = random.Random(7)
+    for _ in range(0):
+        s.append(f'<circle class="tw" cx="{rnd.uniform(px, W):.0f}" cy="{rnd.uniform(py, py + ph):.0f}" r="{rnd.uniform(.5, 1.4):.2f}" fill="{p["moon"]}" style="animation-delay:-{rnd.uniform(0, 3):.2f}s"/>')
+    span = 1400 + P
+    s.append(f'<g transform="rotate(-28 470 150)" filter="url(#soft)">'
+             f'<g class="st1"><path d="{wave(10, P, 40, span, 120)}" transform="translate(-300 0)" fill="{p["a"]}" opacity=".55"/></g>'
+             f'<g class="st2"><path d="{wave(9, P, 120, span, 170, 1.7)}" transform="translate(-300 0)" fill="#ffffff" opacity=".75"/></g>'
+             f'<g class="st3"><path d="{wave(12, P, 170, span, 260, .8)}" transform="translate(-300 0)" fill="{p["b"]}" opacity=".45"/></g>'
+             f'<g class="st2"><path d="{wave(10, P, 260, span, 330, 2.4)}" transform="translate(-300 0)" fill="{p["a"]}" opacity=".35"/></g></g>')
     s.append("</g>")
-    # portrait: drawn outside the clip so the hat pokes above the panel
+    # stacked sticker cards spilling out of the panel's left edge
+    s.append(f'<g filter="url(#drop)">')
+    s.append(f'<g class="card" style="animation-delay:-2s">{pixel_card(112, 168, 150, 214, -14, p, 3, border)}</g>')
+    s.append(f'<g class="card" style="animation-delay:-4s">{pixel_card(150, 160, 150, 214, -7, p, 5, border)}</g>')
+    # front card with the ASCII portrait
     A = json.load(open(os.path.join(HERE, "ascii.json")))
     aw, ah = A["cols"] * A["fs"] * CW, A["rows"] * A["lh"]
-    ax, ay = 46, top - 34  # hat pokes out above the panel
-    s.append(f'<ellipse cx="{ax + aw / 2:.0f}" cy="{ay + ah * .55:.0f}" rx="{aw * .8:.0f}" ry="{ah * .55:.0f}" fill="url(#artGlow)"/>')
-    s.append(ascii_art(p, theme, ax, ay, p["sky2"]))
-    # waves in front of the feet
-    span = W + P
-    s.append(f'<g clip-path="url(#panel)">'
-             f'<g class="w3" opacity=".12"><path d="{wave(12, P, pb - 82, span, pb, 1.3)}" fill="url(#hlh)"/></g>'
-             f'<g class="w2" opacity=".2"><path d="{wave(9, P, pb - 60, span, pb, 0.4)}" fill="url(#hlh)"/></g>'
-             f'<g class="w1" opacity=".32"><path d="{wave(7, P, pb - 40, span, pb, 2.2)}" fill="url(#hlh)"/></g></g>')
-    # moon breaking out of the top-right corner
-    s.append(f'<g class="bob"><circle cx="{W - 92}" cy="40" r="78" fill="url(#glow)"/>'
-             f'<circle cx="{W - 92}" cy="40" r="24" fill="{p["moon"]}" mask="url(#cres)"/></g>')
-    # text
-    x0 = 300
-    s.append(f'<g class="in" style="animation-delay:.1s"><text {MONO} x="{x0}" y="{top + 66}" font-size="17" fill="{p["muted"]}">{X(cfg["greeting"])}</text></g>')
+    cw_, ch_ = 168, 236
+    sc = min((cw_ - 24) / aw, (ch_ - 26) / ah)
+    s.append(f'<g class="card"><g transform="translate(222 170) rotate(5)">'
+             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16" fill="{dark["sky2"]}"/>'
+             f'<g transform="translate({-aw * sc / 2:.1f} {-ah * sc / 2 + 4:.1f}) scale({sc:.3f})">{ascii_art(dark, "dark", 0, 0, dark["sky2"])}</g>'
+             f'<rect x="{-cw_ / 2}" y="{-ch_ / 2}" width="{cw_}" height="{ch_}" rx="16" fill="none" stroke="{border}" stroke-width="5"/>'
+             f'<text {MONO} x="{cw_ / 2 - 6}" y="{-ch_ / 2 - 9}" font-size="13" font-weight="700" fill="{p["text"]}" text-anchor="end">@{X(cfg["login"])}</text>'
+             f'</g></g></g>')
+    # big chunky name with an offset shadow
+    x0 = 330
     name = X(cfg["name"])
-    s.append(f'<g class="in" style="animation-delay:.25s"><text {MONO} x="{x0 - 3}" y="{top + 128}" font-size="60" font-weight="800" fill="url(#hlh)" letter-spacing="-1">{name}</text>'
-             f'<text {MONO} x="{x0 - 3}" y="{top + 128}" font-size="60" font-weight="800" fill="url(#shine)" letter-spacing="-1" opacity=".55">{name}</text></g>')
-    lines, fs, ty = cfg["roles"], 16, top + 164
-    ids = [f"r{i}" for i in range(len(lines))]
+    s.append(f'<g class="in" style="animation-delay:.15s">'
+             f'<text {MONO} x="{x0 + 4}" y="{py + 92}" font-size="72" font-weight="800" fill="{p["a"]}" opacity=".55" letter-spacing="-2">{name}</text>'
+             f'<text {MONO} x="{x0}" y="{py + 88}" font-size="72" font-weight="800" fill="{p["text"]}" letter-spacing="-2">{name}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.3s"><text {MONO} x="{x0 + 2}" y="{py + 124}" font-size="19" font-weight="700" fill="{p["text"]}">{X(cfg["headline"])}</text>'
+             f'<text {MONO} x="{x0 + 2}" y="{py + 148}" font-size="14" fill="{p["muted"]}">{X(cfg["subline"])}</text></g>')
+    s.append(f'<g class="in" style="animation-delay:.45s"><text {MONO} x="{x0 + 2}" y="{py + 192}" font-size="20" font-weight="800" fill="{p["text"]}">Daily drivers</text></g>')
+    # tiles hanging off the bottom edge of the panel
+    for i, slug in enumerate(cfg["drivers"]):
+        tx, ty, ts = x0 + 2 + i * 62, py + 206, 54
+        s.append(f'<g class="pop" style="animation-delay:{.6 + i * .08:.2f}s"><g class="hop" style="animation-delay:-{i * .4:.1f}s">'
+                 f'<rect x="{tx}" y="{ty}" width="{ts}" height="{ts}" rx="12" fill="{p["c1"]}" stroke="{border}" stroke-width="3.5" filter="url(#drop)"/>'
+                 + icon("brand:" + slug, tx + 14, ty + 14, 26, None, theme, p)
+                 + f'<title>{X(ICONS["brand"][slug]["t"])}</title></g></g>')
+    return doc(W, H, "".join(s), p, (("KM", 400), ("KM", 700), ("KM", 800)), defs, css,
+               f"{cfg['name']}: {cfg['headline']}. {cfg['subline']}")
+
+
+def greet(cfg, p, theme):
+    """Big centred typing line under the hero."""
+    H, fs = 76, 32
+    lines = cfg["greetings"]
+    s, ids = [], [f"g{i}" for i in range(len(lines))]
     for i, line in enumerate(lines):
         width = tw(line, fs, mono=True)
-        type_t, hold, erase = len(line) * 0.055, 3.0, 0.5
+        x = (W - width) / 2
+        type_t, hold, erase = len(line) * 0.07, 2.6, 0.6
         dur = type_t + hold + erase
         k1, k2 = type_t / dur, (type_t + hold) / dur
-        begin = f"1s;{ids[-1]}.end" if i == 0 else f"{ids[i - 1]}.end"
-        s.append(f'<clipPath id="rc{i}"><rect x="{x0 - 2}" y="{ty - 20}" width="0" height="30">'
+        begin = f"0s;{ids[-1]}.end" if i == 0 else f"{ids[i - 1]}.end"
+        s.append(f'<clipPath id="gc{i}"><rect x="{x - 2:.1f}" y="0" width="0" height="{H}">'
                  f'<animate id="{ids[i]}" attributeName="width" begin="{begin}" dur="{dur:.2f}s" values="0;{width + 4:.1f};{width + 4:.1f};0" keyTimes="0;{k1:.3f};{k2:.3f};1"/>'
                  f'</rect></clipPath>')
-        s.append(f'<g clip-path="url(#rc{i})"><text {MONO} x="{x0}" y="{ty}" font-size="{fs}" fill="{p["text"]}">{X(line)}</text></g>')
-        s.append(f'<rect x="{x0}" y="{ty - 15}" width="2.5" height="20" rx="1.2" fill="{p["b"]}" opacity="0">'
+        s.append(f'<g clip-path="url(#gc{i})"><text {MONO} x="{x:.1f}" y="48" font-size="{fs}" font-weight="700" fill="{p["text"]}">{X(line)}</text></g>')
+        s.append(f'<rect x="{x:.1f}" y="22" width="4" height="34" rx="2" fill="{p["b"]}" opacity="0">'
                  f'<set attributeName="opacity" to="1" begin="{ids[i]}.begin" end="{ids[i]}.end"/>'
-                 f'<animate attributeName="x" begin="{ids[i]}.begin" dur="{dur:.2f}s" values="{x0};{x0 + width + 4:.1f};{x0 + width + 4:.1f};{x0}" keyTimes="0;{k1:.3f};{k2:.3f};1"/></rect>')
-    # chips like little stickers
-    cx = x0
-    for i, c in enumerate(cfg["chips"]):
-        cw = 14 + 18 + 8 + tw(c["label"], 13.5, 500) + 16
-        rot = (-2.5, 2, -1.5)[i % 3]
-        s.append(f'<g class="in" style="animation-delay:{.5 + i * .1:.2f}s"><g transform="rotate({rot} {cx + cw / 2:.0f} {top + 200})">'
-                 f'<rect x="{cx}" y="{top + 184}" width="{cw:.0f}" height="34" rx="17" fill="{p["surface"]}" fill-opacity=".92"/>'
-                 + icon(c["icon"], cx + 14, top + 192, 18, p["a"] if not c["icon"].startswith("brand:") else None, theme, p)
-                 + f'<text x="{cx + 40}" y="{top + 206}" font-size="13.5" font-weight="500" fill="{p["text"]}">{X(c["label"])}</text></g></g>')
-        cx += cw + 10
-    return doc(W, H, "".join(s), p, (("KM", 400), ("KM", 800), ("RB", 500)), defs, css,
-               f"{cfg['name']}: " + " / ".join(lines))
+                 f'<animate attributeName="x" begin="{ids[i]}.begin" dur="{dur:.2f}s" values="{x:.1f};{x + width + 6:.1f};{x + width + 6:.1f};{x:.1f}" keyTimes="0;{k1:.3f};{k2:.3f};1"/></rect>')
+    return doc(W, H, "".join(s), p, (("KM", 700),), title=" / ".join(lines))
 
 
 # ---------------------------------------------------------------- cards
@@ -575,9 +605,9 @@ def dock(cfg, D, p, theme):
 
 def contact_title(cfg, p, theme):
     H = 70
-    s = [badge(4, 14, 40, "mail", p, theme, p["b"], spin=True),
-         f'<text x="56" y="41" font-size="20" font-weight="700" fill="{p["text"]}">Contact</text>',
-         f'<text x="56" y="60" font-size="13" fill="{p["muted"]}">{X(cfg.get("contact_note", ""))}</text>']
+    s = [badge(2, 8, 50, "mail", p, theme, p["b"], spin=True),
+         f'<text x="64" y="38" font-size="20" font-weight="700" fill="{p["text"]}">Contact</text>',
+         f'<text x="64" y="58" font-size="13" fill="{p["muted"]}">{X(cfg.get("contact_note", ""))}</text>']
     return doc(W, H, "".join(s), p, (("RB", 400), ("RB", 700)), title="Contact")
 
 
@@ -623,6 +653,7 @@ def build(cfg, D):
             out[f"{name}-{theme}.svg"] = fn(PAL[theme], theme)
 
     put("hero", lambda p, t: banner(cfg, D, p, t))
+    put("greet", lambda p, t: greet(cfg, p, t))
     put("about", lambda p, t: about(cfg, D, p, t))
     put("stack", lambda p, t: stack(cfg, D, p, t))
     put("activity", lambda p, t: activity(cfg, D, p, t))
@@ -631,7 +662,8 @@ def build(cfg, D):
     put("contact", lambda p, t: contact_title(cfg, p, t))
 
     P('<div align="center">\n\n')
-    P(pic("hero", f"{cfg['name']}: " + " / ".join(cfg["roles"])), "\n\n")
+    P(pic("hero", f"{cfg['name']}: {cfg['headline']}"), "\n")
+    P(pic("greet", " / ".join(cfg["greetings"])), "\n\n")
     P(pic("about", "About me"), "\n\n")
     P(pic("stack", "Tech stack"), "\n\n")
     cards = []
