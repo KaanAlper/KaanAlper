@@ -11,9 +11,9 @@
 
 <a href="https://github.com/KaanAlper/ByteForge"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-byteforge-dark.svg?v=2bc2ef61"><img src="assets/project-byteforge-light.svg?v=31acae47" width="49%" alt="ByteForge"></picture></a>&nbsp;<a href="https://github.com/KaanAlper/AsenaPlug"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-asenaplug-dark.svg?v=e60a8520"><img src="assets/project-asenaplug-light.svg?v=ddbb0143" width="49%" alt="AsenaPlug"></picture></a>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=c897b348"><img src="assets/activity-light.svg?v=442b2403" width="100%" alt="GitHub activity"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=694b865f"><img src="assets/activity-light.svg?v=c5634703" width="100%" alt="GitHub activity"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/streak-dark.svg?v=f066df51"><img src="assets/streak-light.svg?v=f1634bfd" width="100%" alt="Streak"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/streak-dark.svg?v=757b7cd0"><img src="assets/streak-light.svg?v=5996e0d9" width="100%" alt="Streak"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/KaanAlper/KaanAlper/output/snake-dark.svg"><img src="https://raw.githubusercontent.com/KaanAlper/KaanAlper/output/snake-light.svg" width="100%" alt="A snake eating the contribution graph"></picture>
 
@@ -21,11 +21,11 @@
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-dark.svg?v=cfe5aa12"><img src="assets/contact-light.svg?v=e6be873b" width="100%" alt="Contact"></picture>
 
-<a href="https://www.instagram.com/kaan__alper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-instagram-dark.svg?v=396137d0"><img src="assets/contact-instagram-light.svg?v=d07b2678" width="49%" alt="Instagram: @kaan__alper"></picture></a>&nbsp;<a href="https://x.com/Kaan__Alper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-x-dark.svg?v=806dc3e2"><img src="assets/contact-x-light.svg?v=ee0ab1c6" width="49%" alt="X: @Kaan__Alper"></picture></a>
+<a href="https://www.instagram.com/kaan__alper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-instagram-dark.svg?v=5ceb25f5"><img src="assets/contact-instagram-light.svg?v=dc0a7b33" width="49%" alt="Instagram: @kaan__alper"></picture></a>&nbsp;<a href="https://x.com/Kaan__Alper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-x-dark.svg?v=a9628096"><img src="assets/contact-x-light.svg?v=d49e6d89" width="49%" alt="X: @Kaan__Alper"></picture></a>
 
-<a href="https://anilist.co/user/KaanAlper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-anilist-dark.svg?v=3990d8a2"><img src="assets/contact-anilist-light.svg?v=04944fe5" width="49%" alt="AniList: KaanAlper"></picture></a>&nbsp;<a href="https://steamcommunity.com/id/kaanalper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-steam-dark.svg?v=1eb121e5"><img src="assets/contact-steam-light.svg?v=ba2daf19" width="49%" alt="Steam: kaanalper"></picture></a>
+<a href="https://anilist.co/user/KaanAlper/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-anilist-dark.svg?v=4a4a61f1"><img src="assets/contact-anilist-light.svg?v=50425a45" width="49%" alt="AniList: KaanAlper"></picture></a>&nbsp;<a href="https://steamcommunity.com/id/kaanalper"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-steam-dark.svg?v=8a10ce65"><img src="assets/contact-steam-light.svg?v=7dac42de" width="49%" alt="Steam: kaanalper"></picture></a>
 
-<a href="mailto:kaanalperkaraaslan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-gmail-dark.svg?v=7faa743f"><img src="assets/contact-gmail-light.svg?v=17d6c0df" width="100%" alt="Email: kaanalperkaraaslan@gmail.com"></picture></a>
+<a href="mailto:kaanalperkaraaslan@gmail.com"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-gmail-dark.svg?v=40673de9"><img src="assets/contact-gmail-light.svg?v=39d611ce" width="49%" alt="Email: kaanalperkaraaslan@gmail.com"></picture></a>&nbsp;<a href="https://www.linkedin.com/in/kaanalperkaraaslan/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/contact-linkedin-dark.svg?v=278a62dd"><img src="assets/contact-linkedin-light.svg?v=26ad3add" width="49%" alt="LinkedIn: kaanalperkaraaslan"></picture></a>
 
 <br>
 

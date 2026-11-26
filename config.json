@@ -182,8 +182,13 @@
       "icon": "gmail",
       "label": "Email",
       "handle": "kaanalperkaraaslan@gmail.com",
-      "url": "mailto:kaanalperkaraaslan@gmail.com",
-      "wide": true
+      "url": "mailto:kaanalperkaraaslan@gmail.com"
+    },
+    {
+      "icon": "linkedin",
+      "label": "LinkedIn",
+      "handle": "kaanalperkaraaslan",
+      "url": "https://www.linkedin.com/in/kaanalperkaraaslan/"
     }
   ]
 }

@@ -686,7 +686,7 @@ def contact(c, p, theme, i, wide=False):
     slug = c["icon"]
     tint = readable("#" + ICONS["brand"][slug]["c"], p, theme) if slug in ICONS["brand"] else p["a"]
     s = [f'<rect width="{w}" height="{H}" rx="22" fill="{p["surface"]}"/>',
-         badge(16, 14, 48, "brand:" + slug, p, theme, tint, n=9, amp=.07),
+         badge(16, 14, 48, "brand:" + slug, p, theme, tint, n=9, amp=.07, spin=True),
          f'<text x="78" y="34" font-size="16" font-weight="700" fill="{p["text"]}">{X(c["label"])}</text>',
          f'<text x="78" y="55" font-size="13" fill="{p["muted"]}">{X(c["handle"])}</text>',
          f'<circle cx="{w - 36}" cy="38" r="17" fill="{p["c1"]}"/>' + icon("arrow_outward", w - 45, 29, 18, p["muted"])]
