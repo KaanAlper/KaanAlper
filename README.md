@@ -11,7 +11,7 @@
 
 <a href="https://github.com/KaanAlper/ByteForge"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-byteforge-dark.svg?v=2bc2ef61"><img src="assets/project-byteforge-light.svg?v=31acae47" width="49%" alt="ByteForge"></picture></a>&nbsp;<a href="https://github.com/KaanAlper/AsenaPlug"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-asenaplug-dark.svg?v=e60a8520"><img src="assets/project-asenaplug-light.svg?v=ddbb0143" width="49%" alt="AsenaPlug"></picture></a>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=37e7068d"><img src="assets/activity-light.svg?v=6218c617" width="100%" alt="GitHub activity"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=c897b348"><img src="assets/activity-light.svg?v=442b2403" width="100%" alt="GitHub activity"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="assets/streak-dark.svg?v=f066df51"><img src="assets/streak-light.svg?v=f1634bfd" width="100%" alt="Streak"></picture>
 
