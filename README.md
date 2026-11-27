@@ -11,9 +11,9 @@
 
 <a href="https://github.com/KaanAlper/ByteForge"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-byteforge-dark.svg?v=2bc2ef61"><img src="assets/project-byteforge-light.svg?v=31acae47" width="49%" alt="ByteForge"></picture></a>&nbsp;<a href="https://github.com/KaanAlper/AsenaPlug"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/project-asenaplug-dark.svg?v=e60a8520"><img src="assets/project-asenaplug-light.svg?v=ddbb0143" width="49%" alt="AsenaPlug"></picture></a>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=d922131e"><img src="assets/activity-light.svg?v=31222282" width="100%" alt="GitHub activity"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=9632e18b"><img src="assets/activity-light.svg?v=d168d0f7" width="100%" alt="GitHub activity"></picture>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/streak-dark.svg?v=aecdc145"><img src="assets/streak-light.svg?v=c109ef6c" width="100%" alt="Streak"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/streak-dark.svg?v=c6e8aacd"><img src="assets/streak-light.svg?v=43e59931" width="100%" alt="Streak"></picture>
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/KaanAlper/KaanAlper/output/snake-dark.svg"><img src="https://raw.githubusercontent.com/KaanAlper/KaanAlper/output/snake-light.svg" width="100%" alt="A snake eating the contribution graph"></picture>
 
